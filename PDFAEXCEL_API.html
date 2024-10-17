@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ELEMENTOS JSON</title>
+  <link rel="stylesheet" href="pestanas.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    .text-item {
+      margin-bottom: 10px;
+    }
+    .text-item p {
+      margin: 0;
+    }
+  </style>
+</head>
+<body>
+
+    <div class="encabezado">
+        
+    </div>
+    <div class = "botonesDiv">
+        <h1> Convierte Factura PDF a Formato xlsx (Excel)</h1>
+        <br>
+        <button class="btnImportar" onclick=""><img src="https://cdn-icons-png.flaticon.com/512/724/724831.png" alt="">Importar PDF</button>
+        <button class= "btnExcel" onclick = "downloadExcel()"><img src="https://images.vexels.com/media/users/3/157561/isolated/preview/5077aba5e425c55dff227a93b655da7b-icono-de-descarga-simple.png">Descargar en xls (Excel)</button>
+    </div>
+
+    <div class="contenido">
+        <div id="text-output"></div>
+        <script>
+          //cargar el json
+          fetch('./pdf.json')
+          .then(response => {
+              if (!response.ok) {
+                  throw new Error('ERROR de Respuesta');
+              }
+              return response.json();
+          })
+          .then(jsonData => {
+              const textOutputDiv = document.getElementById('text-output');
+      
+              if (jsonData && jsonData.elements) {
+                  let claveProveedor = 'TON23';
+                  let headers = ['CLAVE PROVEEDOR', 'No.Factura', 'Fecha Factura', 'MONTO FACTURA', 'MONEDA', 'INCOTERM', 
+                  'SUBDIVISION', 'CERT. ORIGEN', 'NUMERO DE PARTE', 'PAIS ORIGEN','FRACCION', 'Description', 'Quantity', 
+                  'PRECIO (USD)', 'VALOR DE LA MERCANCIA', 'UMC', 'CANTIDAD DE UMC', 'CANTIDAD DE UMT', 'Marca', 'Submodelo', 
+                  'No. Serie','VALORACION', 'TIPO DE MERCAN', 'VINCULACION'];
+                  let rows = [];
+                  let currentRow = {
+                      'CLAVE PROVEEDOR': claveProveedor,
+                      'No.Factura': '',
+                      'Fecha Factura': '',
+                      'MONEDA': '',
+                      'INCOTERM': ''
+                  };
+                  let invoiceNo = '';
+                  let numFactura = '';
+                  let fechaFactura = '';
+                  let fechaMod = '';
+                  let moneda = '';
+                  let monMod = '';
+                  let incoterm = '';
+                  let numFraccion = "0000000000";
+      
+                  jsonData.elements.forEach((ciertoElemento) =>{
+                      texto = ciertoElemento.Text || '';
+                      if(texto.includes('CIF')){
+                          incoterm = texto;
+                      }
+                  });
+      
+                  //recorrido del JSON
+                  jsonData.elements.forEach((element, index) => {
+                      let text = element.Text || '';
+                      let path = element.Path || '';
+                      
+                      if (text.includes("NINGBO DYNACO HYDRAULIC CO., LTD.") ||
+                          text.includes("HUILONG INDUSTRIAL ZONE 39,YIWU, JINHUA, ZHEJIANG PROVINCE, CHINA") ||
+                          text.includes("TAX ID:") ||
+                          text.includes("Commercial Invoice") ||
+                          text.includes("To:") ||
+                          text.includes("Attn:")) {
+                          return;
+                      }
+                      
+                      if (path === '//Document/Sect[2]/P[3]/Sub') {
+                          invoiceNo = text;
+                          numFactura = invoiceNo.slice(12);
+                          currentRow['No.Factura'] = numFactura;
+                      }
+                      if (path === '//Document/Sect[2]/P[3]/Sub[3]') {
+                          fechaFactura = text;
+                          fechaMod = fechaFactura.slice(9);
+                          currentRow['Fecha Factura'] = fechaMod;
+                      }
+                      if (path.includes(`//Document/Sect[`) && path.includes(`]/Table/TR/TH[`) && path.includes(`]/P`) && text.includes('USD')) {
+                          moneda = text;
+                          monMod = moneda.slice(8, moneda.length - 2);
+                          currentRow['MONEDA'] = monMod;
+                      }
+                      
+                      if (path.includes(`]/TD[2]/P`) && !text.includes('CIF')) {
+                          currentRow['Description'] = text;
+                      } else if (path.includes(`]/TD[3]/P`)) {
+                          currentRow['NUMERO DE PARTE'] = text;
+                      } else if (path.includes(`]/TD[4]/P`) && !text.includes('PCS')) {
+                          currentRow['Quantity'] = text;
+                      } else if (path.includes(`]/TD[5]/P`)) {
+                          currentRow['PRECIO (USD)'] = text;
+                      } else if (path.includes(`]/TD[6]/P`)) {
+                          currentRow['VALOR DE LA MERCANCIA'] = text;
+                      }
+                      
+                      currentRow['INCOTERM'] = incoterm;
+                      currentRow['FRACCION'] = numFraccion;
+      
+                      if (index === jsonData.elements.length - 1 || path.includes(`]/TD[6]/P`)) {
+                          rows.push(currentRow);
+                          currentRow = {
+                              'CLAVE PROVEEDOR': claveProveedor,
+                              'No.Factura': numFactura,
+                              'Fecha Factura': fechaMod,
+                              'MONEDA': monMod,
+                              'INCOTERM': incoterm
+                          };
+                      }
+                  });
+      
+                  let tableHTML = `
+                  <div class = "tablaD">
+                      <table id="dataTable" class="tablaDatos">
+                          <thead>
+                              <tr>
+                                  ${headers.map(header => `<th>${header}</th>`).join('')}
+                              </tr>
+                          </thead>
+                          <tbody>
+                  `;
+      
+                  rows.forEach(row => {
+                      tableHTML += `
+                          <tr>
+                              ${headers.map(header => `<td>${row[header] || ''}</td>`).join('')}
+                          </tr>
+                        </div>
+                      `;
+                  });
+      
+                  tableHTML += `
+                          </tbody>
+                      </table>
+                  `;
+      
+                  textOutputDiv.innerHTML = tableHTML;
+              } else {
+                  textOutputDiv.innerHTML = '<p>No hay elementos que mostrar</p>';
+              }
+          })
+          .catch(error => {
+              console.error('Error fetching JSON:', error);
+              document.getElementById('text-output').innerHTML = '<p>Error al cargar el JSON</p>';
+          });
+      
+            // Función para descargar la tabla como Excel
+          function htmlExcel(idTabla, nombreArchivo = '') {
+            let linkDescarga;
+            let tipoDatos = 'application/vnd.ms-excel';
+            let tablaDatos = document.getElementById(idTabla);
+            let tablaHTML = tablaDatos.outerHTML;
+            
+            tablaHTML = tablaHTML.replace(/<th>/g, '<th style="background-color: blue; color: white; border: 1px solid rgb(255, 255, 255); height: 40px;">');
+            
+            // Aplicar formato de texto a todas las celdas
+            tablaHTML = tablaHTML.replace(/<td>([^<]*)<\/td>/g, function(match, p1) {
+              // Si la celda es un número de 8 dígitos con ceros, agregar el formato de texto
+              if (/^0{10}$/.test(p1)) {
+                  return '<td style="mso-number-format:\'\\@\';">' + p1 + '</td>';
+              } else {
+                  return '<td>' + p1 + '</td>';
+              }
+              });
+      
+            tablaHTML = tablaHTML.replace(/ /g, '%20');
+            // Nombre del archivo
+            nombreArchivo = nombreArchivo ? nombreArchivo + '.xls' : 'archivo.xlsx';
+      
+            // Crear el link de descarga
+            linkDescarga = document.createElement("a");
+      
+            document.body.appendChild(linkDescarga);
+      
+            if (navigator.msSaveOrOpenBlob) {
+              let blob = new Blob(['\ufeff', tablaHTML], {
+                type: tipoDatos
+              });
+              navigator.msSaveOrOpenBlob(blob, nombreArchivo);
+            } else {
+              // Crear el link al archivo
+              linkDescarga.href = 'data:' + tipoDatos + ', ' + tablaHTML;
+      
+              // Setear el nombre de archivo
+              linkDescarga.download = nombreArchivo;
+      
+              //Ejecutar la función
+              linkDescarga.click();
+            }
+          }
+      
+          function downloadExcel() {
+            htmlExcel('dataTable', 'Datos_JSON');
+          }
+        </script>
+
+        
+    </div>
+</body>
+</html>
+

@@ -1,0 +1,92 @@
+/*form{
+    align-items: center;
+}
+.prueba{
+    color: rgb(255, 255, 255);
+    
+}
+body{
+    font-family: Arial, Helvetica, sans-serif;
+    background-color:rgb(56, 96, 143);
+    
+}
+.contenedor1{
+    background-color: rgb(209, 213, 230);
+    border-radius: 5px;
+    height: auto;
+    width: auto;
+    margin: 5%;
+    padding: 25px;
+    
+    /*justify-content: center;
+    align-items: center;*/
+    /*flex-direction: column;
+    display: inline-block;
+    align-items: center;
+}
+.labelDatos{
+    color: rgb(8, 43, 10);
+    size:7cap;
+}
+
+.clP, .nF, .date, .monto, .incoterm, .nParte{
+    border-radius: 4px;
+    margin-top: 8px;
+}
+.monedas{
+    background-color: aqua;
+}*/
+
+/* Estilos para el cuerpo (body) */
+body {
+    background-image: url('C:\Users\gera_\OneDrive\Escritorio\ResidenciaJS\Imagenes\AATLA_PortadaH.png');
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: rgb(56, 96, 143);
+    display: flex;
+    justify-content: center; /* Centra el contenido horizontalmente */
+    align-items: center; /* Centra el contenido verticalmente */
+    height: 100vh; /* Hace que ocupe el 100% del alto visible del viewport */
+    margin: 0; /* Elimina el margen por defecto del body */
+}
+
+/* Estilos para el contenedor principal */
+.contenedor1 {
+    background-color: rgb(209, 213, 230);
+    border-radius: 5px;
+    padding: 25px;
+    width: 80%; /* Ancho del contenedor */
+    max-width: 600px; /* Máximo ancho para mantener el contenido legible */
+    box-sizing: border-box; /* Incluye el padding en el ancho total */
+}
+
+/* Estilos para etiquetas */
+.labelDatos, .claveP, .lblNF, label[for="text"] {
+    display: inline-block; /* Hace que las etiquetas se muestren en línea */
+    margin-bottom: 5px; /* Espacio entre etiquetas */
+    width: 30%; /* Ancho fijo para etiquetas */
+}
+
+/* Estilos para inputs */
+.clP, .nF, .date, .monto, .incoterm, .nParte, [name="monedas"] {
+    display: inline-block; /* Hace que los inputs se muestren en línea */
+    width: 65%; /* Ancho fijo para inputs */
+    padding: 8px; /* Espaciado interno */
+    border: 1px solid #ccc; /* Borde del input */
+    border-radius: 4px; /* Borde redondeado */
+    box-sizing: border-box; /* Incluye el padding en el ancho total */
+    margin-bottom: 10px; /* Espacio entre inputs */
+}
+
+/* Estilo especial para el input de monedas */
+.monedas {
+    width: 72%; /* Ajuste específico para el input de monedas */
+    background-color: aqua;
+}
+
+/* Estilo para el hr */
+hr {
+    border: 0;
+    height: 1px;
+    background-color: #1bdde4;
+    margin: 15px 0;
+}

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resultado de la Consulta</title>
+</head>
+<body>
+    <h1>Resultado de la Consulta</h1>
+
+    <table id="resultadosTable" border="1">
+        <thead>
+            <tr>
+                <th>DES_MERC</th>
+                <th>NUM_PART</th>
+            </tr>
+        </thead>
+        <tbody id="resultadosBody">
+            <!-- Aquí se agregarán las filas con los resultados -->
+        </tbody>
+    </table>
+
+    <script>
+        fetch('./Backend/PDF_EXPORT.json')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('ERROR de Respuesta');
+            }
+            return response.json();
+        })
+        .then(jsonData => {
+            if (jsonData && jsonData.elements) {
+                
+                const promesas = jsonData.elements.map((unElemento) => {
+                    var regex = /\d+/g;
+                    let text = unElemento.Text || '';
+                    let numerosParte = text.match(regex); //EXTRAIGO NUMEROS
+    
+                    //SI NO HAY NUMEROS DE PARTE SE DEVUELVE LA PROMESA
+                    if (!numerosParte) {
+                        return Promise.resolve([]); // Continua el flujo incluso sin datos válidos
+                    }
+    
+                    //SI HAY NUMEROS DE PARTE HACE LA PETICION
+                    return fetch('http://localhost:8081/data', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ text: numerosParte.join('') }) // Envía solo los números concatenados
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Error en la respuesta del servidor');
+                        }
+                        return response.json();
+                    })
+                    .catch(error => {
+                        console.error('Error al obtener los datos:', error);
+                        return []; // Si hay error, devolvemos un array vacío y continuamos
+                    });
+                });
+    
+                // Esperamos a que todas las promesas se resuelvan
+                Promise.all(promesas)
+                .then(resultados => {
+                    // Unimos todos los resultados en un solo array
+                    const todosLosResultados = [].concat(...resultados);
+    
+                    // Obtenemos el tbody de la tabla
+                    const tbody = document.getElementById('resultadosBody');
+    
+                    // Limpiar los resultados previos
+                    tbody.innerHTML = '';
+    
+                    // Añadimos los resultados a la tabla
+                    todosLosResultados.forEach(row => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td>${row.DES_MERC}</td>
+                            <td>${row.NUM_PART}</td>
+                        `;
+                        tbody.appendChild(tr); // Añadimos la fila a la tabla
+                    });
+    
+                    // Si no hay resultados, mostramos un mensaje en la tabla
+                    if (todosLosResultados.length === 0) {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `<td colspan="2">No se encontraron resultados.</td>`;
+                        tbody.appendChild(tr);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error al procesar los resultados:', error);
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error al leer el archivo JSON:', error);
+        });
+    </script>
+    
+</body>
+</html>

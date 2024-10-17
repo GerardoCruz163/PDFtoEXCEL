@@ -1,0 +1,197 @@
+/* Estilo general del cuerpo */
+body {
+  background: rgb(47,25,106);
+background: linear-gradient(85deg, rgba(47,25,106,1) 0%, rgba(28,38,80,1) 22%, rgba(49,200,208,1) 100%);
+  background-repeat: no-repeat;
+  height: 3000px;
+  margin: 0;
+  padding: 0;
+
+}
+
+/* Encabezado */
+.encabezado {
+  backdrop-filter: blur(25px);
+  background-color: rgba(0, 0, 0, 0.288);
+  
+  position: sticky;
+  color: #ffffff;
+  height: 120px;
+  width: auto;
+  left: 0%;
+  top: 0;
+  padding: 0;
+  margin: 0;
+  background-image: url('/Imagenes/AATLA_Logo_FObscuros.png');
+  background-size: 250px;
+  background-repeat: no-repeat;
+  background-position: center;
+  z-index: 10;
+  /*SOMBREADO*/
+  -webkit-box-shadow: 0px 8px 53px -15px rgba(0,0,0,0.77);
+  -moz-box-shadow: 0px 8px 53px -15px rgba(0,0,0,0.77);
+  box-shadow: 0px 8px 53px -15px rgba(0,0,0,0.77);
+  /*BORDES REDONDEADOS DE LA PARTE DE ABAJO*/
+  border-radius: 0px 0px 40px 40px;
+  -moz-border-radius: 0px 0px 40px 40px;
+  -webkit-border-radius: 0px 0px 40px 40px;
+  border: 0px solid #000000;
+}
+
+/* Sección de botones */
+.botonesDiv {
+  position: sticky;
+  margin: 0;
+  height: 100px;
+  width: auto;
+  top: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: x-small;
+  color: white;
+  font-style: italic;
+  
+  z-index: 0;
+  
+}
+
+/* Estilo para input de archivos */
+.inputFile1 {
+  backdrop-filter: 10px;
+}
+
+/* Contenedor principal del contenido */
+.contenido {
+  position: absolute;
+  left: 2%;
+  top: 200px;
+  width: 96%;
+  justify-content: center;
+  margin-top: 5px;
+}
+
+/* Estilo para la tabla de datos */
+.tablaD {
+  border: 2px solid #77c5be;
+  border-radius: 20px;
+  overflow-y: auto;
+  overflow-x: auto;
+  margin: 22px;
+  z-index: 1;
+}
+
+/* Lista de proveedores */
+.listaProveedores {
+  background-color: #ffffff1e;
+  border: 1px solid #77c5be;
+  backdrop-filter: blur(10px);
+  align-items: center;
+  border-radius: 10px;
+  padding: 10px 20px;
+  color: #ffffff;
+  font-size: 16px;
+}
+
+/* Botón de exportar a Excel */
+.btnExcel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 20px;
+  background-color: #ffffff1e;
+  border: none;
+  border: 1px;
+  color: #ffffffd3;
+  font-size: 16px;
+  margin: 4px 2px;
+  cursor: pointer;
+  border-radius: 10px;
+  border-style: solid;
+}
+
+.btnExcel:hover, .listaProveedores:hover {
+  background-color: #51d3c8;
+  transition: 0.5s;
+  /*box-shadow: -1px -1px 6px 0 rgb(122,221,102), 4px 4px 16px 2px rgb(92,162,235);*/
+}
+
+.btnExcel:active, .listaProveedores:active {
+  background-color: #ffffff1e;
+}
+
+/* Estilo del GIF en el botón */
+.btnExcel img {
+  width: 20px;
+  height: 20px;
+  margin-right: 8px;
+}
+
+/* Botón de importar */
+.btnImportar img {
+  width: 20px;
+  height: 20px;
+  margin-right: 8px;
+}
+
+.btnImportar:hover {
+  background-color: #51d3c8;
+  transition: 0.2s;
+  /*box-shadow: -1px -1px 6px 0 rgb(122,221,102), 4px 4px 16px 2px rgb(122,221,102);*/
+}
+
+.btnImportar:active {
+  background-color: #89ded7;
+}
+
+/* Estilo para la tabla de datos */
+.tablaDatos {
+  width: 100px;
+  border-collapse: collapse;
+  background-color: #ffffffb9;
+}
+
+.tablaDatos th {
+  border: 1px solid #2ec0b4;
+  padding: 4px 15px;
+  text-align: center;
+  background-color: #2ec0b4;
+  
+  color: #ffffff;
+  position: sticky;
+}
+
+.tablaDatos td {
+  border: 1px solid #8a8a8a;
+  padding: 8px;
+  text-align: left;
+}
+
+.creditos {
+  display: flex; /* Flexbox para alinear la imagen y el texto */
+  align-items: center; /* Centra verticalmente los elementos dentro del div */
+  justify-content: space-between; /* Acomoda el logo y el texto */
+  background-color: rgba(0, 0, 0, 0.427); /* Fondo oscuro para los créditos */
+  backdrop-filter: blur(5px);
+  color: #ffffff; /* Color del texto */
+  font-style: inherit;
+  height: 30px; /* Mantiene una altura fija */
+  width: 100%; /* Acomoda el div a lo ancho de la ventana */
+  position: fixed; /* Fijo en la parte inferior de la ventana */
+  bottom: 0; /* Fija el div al fondo de la página */
+  padding: 0 20px; /* Espaciado interno horizontal */
+  z-index: 10; /* Asegura que esté sobre otros elementos */
+}
+
+.creditos img {
+  height: 20px; /* Ajusta el tamaño de la imagen del logo */
+  margin-right: 10px; /* Espacio entre la imagen y el texto */
+}
+
+.creditos-texto {
+  flex-grow: 1; /* El texto ocupa el resto del espacio */
+  text-align: center; /* Alineación del texto */
+  padding-left: 10px; /* Añade algo de espacio antes del texto */
+  font-size: 13px; /* Tamaño de la fuente */
+}
