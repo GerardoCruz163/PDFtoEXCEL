@@ -34,11 +34,15 @@
                 const promesas = jsonData.elements.map((unElemento) => {
                     var regex = /\d+/g;
                     let text = unElemento.Text || '';
+                    let path = unElemento.Path || '';
+
+                    if(path.includes('//Document/Table[10]/TR[') && path.includes(']/TD[2]/P')){
+                    }
                     let numerosParte = text.match(regex); //EXTRAIGO NUMEROS
     
                     //SI NO HAY NUMEROS DE PARTE SE DEVUELVE LA PROMESA
                     if (!numerosParte) {
-                        return Promise.resolve([]); // Continua el flujo incluso sin datos válidos
+                        return Promise.resolve([]); //SIGUE EL FLUJO
                     }
     
                     //SI HAY NUMEROS DE PARTE HACE LA PETICION
@@ -47,7 +51,7 @@
                         headers: {
                             'Content-Type': 'application/json'
                         },
-                        body: JSON.stringify({ text: numerosParte.join('') }) // Envía solo los números concatenados
+                        body: JSON.stringify({ text: numerosParte.join('') }) //ENVIA NUMEROS CONCATENADOS
                     })
                     .then(response => {
                         if (!response.ok) {
@@ -57,7 +61,7 @@
                     })
                     .catch(error => {
                         console.error('Error al obtener los datos:', error);
-                        return []; // Si hay error, devolvemos un array vacío y continuamos
+                        return []; //SI HAY ERROR ENVIA EL ARREGLO VACIO Y CONTINUA CON EL TRABAJO
                     });
                 });
     

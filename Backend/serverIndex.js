@@ -47,13 +47,10 @@ const bddCredenciales = {
 
 //CONSULTA
 app.post('/data', (req, res) => {
-
     const text = req.body.text; //recibo text del json que recibo
-
     if (!/^\d+$/.test(text)) {
         return res.status(400).send('El número de parte no es válido');
     }
-
     // Conexion a la base de datos
     firebird.attach(bddCredenciales, (err, db) => {
         if (err) {
@@ -69,7 +66,7 @@ app.post('/data', (req, res) => {
             
             db.detach();
 
-            // Si hay resultados, los enviamos como JSON
+            //Si hay resultados, los enviamos como JSON
             if (result.length > 0) {
                 res.json(result); // Enviar los resultados como un objeto JSON
             } else {
