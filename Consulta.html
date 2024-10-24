@@ -14,12 +14,17 @@
                 <th>NO. FACTURA</th>
                 <th>FECHA FACTURA</th>
                 <th>MONTO FACTURA</th>
-                <th>DESCRIPCION</th>
                 <th>NO. PARTE</th>
+                <th>PAIS ORIGEN</th>
+                <th>VENDEDOR</th>
+                <th>FRACCION</th>
+                <th>DESCRIPCION</th>
+                <th>MONEDA</th>
+                <th>VALOR DE LA MERCANCIA</th>
             </tr>
         </thead>
         <tbody id="resultadosBody">
-            <!-- Aquí se agregarán las filas con los resultados -->
+            
         </tbody>
     </table>
 
@@ -36,8 +41,10 @@
                 var regex = /\d+/g; //extrae numeros
                 var regexFecha = /\b(0?[1-9]|[12][0-9]|3[01])[-\/](0?[1-9]|1[012])[-\/](\d{4})\b/;
                 let numFactura = '';
-                
-
+                //VARIABLES PARA EL MONTO TOTAL
+                var textoMonto = '';
+                var regexMonto = /\b\d{1,3},\d{1,2}\b/;
+                var valoresMercancia = [];//aqui almaceno los precios de cada producto                
                 //-- FORMATO --
                 //PROVEEDOR EDITORIAL JUVENTUD 'VER106'
                 //NUMERO DE FACTURA
@@ -49,7 +56,6 @@
                     }
                 });
 
-                
                 //FECHA DE FACTURA
                 let fechaFactura = '';
                 jsonData.elements.forEach((unElemento)=>{
@@ -61,37 +67,65 @@
                 });
 
                 //MONTO DE LA FACTURA
-                var montoFactura = 0.0;
-                var textoMonto = '';
-                var regexMonto = /\b\d{1,3},\d{1,2}\b/;
                 jsonData.elements.forEach((unElemento)=>{
                     let text = unElemento.Text;
                     let path = unElemento.Path;
-                    if(path.includes('//Document/Table[4]/TR[') && path.includes(']/TD[5]/P')){
-                        textoMonto = text.match(regex);
+                    if(path.includes('//Document/Table/TR[8]/TD[2]/P')){
+                        //EXTRAIGO EL MONTO USANDO LA EXPRESION REGULAR
+                        textoMonto = text;
+                    }
+                });
+
+                //VALOR DE LA MERCANCIA
+                jsonData.elements.forEach((unElemento)=>{
+                    let text = unElemento.Text || '';
+                    let path = unElemento.Path || '';
+                    if(path.includes('//Document/Table[') && path.includes(']/TR[') && path.includes(']/TD[6]/P')){
+                        valoresMercancia.push(text);
+                    }
+                });
+
+                //MONEDA
+                let moneda= '';
+                jsonData.elements.forEach((unElemento)=>{
+                    let text = unElemento.Text || '';
+                    if(text.includes('Eur') || text.includes('Euros')){
+                        moneda = 'EUR';
+                    }
+                })
+
+                //PAIS VENDEDOR
+                let paisVendedor = '';
+                jsonData.elements.forEach((unElemento)=>{
+                    let text = unElemento.Text;
+                    let path = unElemento.Path;
+                    if(path.includes('//Document/Table/TR[6]/TD[4]/P')){
+                        if(text.includes('España')){
+                            paisVendedor = 'ESP';
+                        }else{
+                            paisVendedor = 'OTRO'
+                        }
                     }
                 })
 
                 //DESCRIPCION POR NUMERO DE PARTE (AQUI SE HACE LA CONSULTA A LA BASE DE DATOS)
                 const promesas = jsonData.elements.map((unElemento) =>{
                     let text = unElemento.Text || '';
+
+
                     let numerosParte = text.match(regex); //EXTRAIGO NUMEROS
-                    /*if(path.includes('//Document/Table[10]/TR[') && path.includes(']/TD[5]/P')){
-                    }*/
-    
                     //SI NO HAY NUMEROS DE PARTE SE DEVUELVE LA PROMESA
                     if (!numerosParte) {
                         return Promise.resolve([]); //SIGUE EL FLUJO
                     }
-    
-                    
                     //SI HAY NUMEROS DE PARTE HACE LA PETICION
                     return fetch('http://localhost:8081/data', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
                         },
-                        body: JSON.stringify({ text: numerosParte.join('') }) //ENVIA NUMEROS CONCATENADOS
+                        body: JSON.stringify({ text: numerosParte.join('') }), //ENVIA NUMEROS CONCATENADOS
+                        
                     })
                     .then(response => {
                         if (!response.ok) {
@@ -118,14 +152,18 @@
                     tbody.innerHTML = '';
     
                     // Añadimos los resultados a la tabla
-                    todosLosResultados.forEach(row => {
+                    todosLosResultados.forEach((row, index) => {
                         const tr = document.createElement('tr');
                         tr.innerHTML = `
                         <td>${numFactura || 'No disponible'}</td>
                         <td>${fechaFactura}</td>
                         <td>${textoMonto}</td>
-                        <td>${row.DES_MERC}</td>
                         <td>${row.NUM_PART}</td>
+                        <td>${' '}</td>
+                        <td>${paisVendedor}</td>
+                        <td>${row.DES_MERC}</td>
+                        <td>${moneda}</td>
+                        <td>${valoresMercancia[index]}</td>
                         `;
                         tbody.appendChild(tr); // Añadimos la fila a la tabla
                     });

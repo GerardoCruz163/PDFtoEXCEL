@@ -49,7 +49,7 @@ const bddCredenciales = {
 app.post('/data', (req, res) => {
     const text = req.body.text; //recibo text del json que recibo
     if (!/^\d+$/.test(text)) {
-        return res.status(400).send('El número de parte no es válido');
+        return res.status(400).send('El numero de parte no es válido');
     }
     // Conexion a la base de datos
     firebird.attach(bddCredenciales, (err, db) => {
