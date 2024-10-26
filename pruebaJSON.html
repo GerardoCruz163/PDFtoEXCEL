@@ -38,13 +38,13 @@
         <div id="text-output"></div>
         <script>
 
-            fetch('http://localhost:8081/data') // Cambia esta ruta por la de tu servidor
+            fetch('http://localhost:8081/data') // 
             .then(response => response.json())
             .then(data => {
                 const resultadosPre = document.getElementById('resultados');
                 
                 // Convertimos el JSON en una cadena de texto con formato
-                const textoResultado = JSON.stringify(data, null, 2); // Formateamos el JSON con sangría de 2 espacios
+                const textoResultado = JSON.stringify(data, null, 2); 
                 
                 // Mostramos el JSON en el <pre>
                 resultadosPre.textContent = textoResultado;
@@ -335,7 +335,7 @@
     <div class = "creditos">
         <img src="/Imagenes/ADBE_BIG.D-dedf7ea0.png" alt="Logo del sitio">
         <div class="creditos-texto">
-        Este sitio utiliza el servicio de Adobe Services. Departamento de Sistemas, Tecno Logistica Aduanal S.A de C.V. - © 2024 Adobe Services.
+            © 2024 Adobe Services. Utiliza el servicio de Adobe Services. Departamento de Sistemas, Tecno Logistica Aduanal S.A de C.V.
     </div>
     </div>
 </body>

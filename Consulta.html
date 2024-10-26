@@ -7,7 +7,7 @@
 </head>
 <body>
     <h1>Resultado de la Consulta</h1><img src="https://i.gifer.com/QHNs.gif" alt="">
-
+    <button onclick="downloadExcel()">Descargar Excel</button>
     <table id="resultadosTable" border="1">
         <thead>
             <tr>
@@ -99,11 +99,9 @@
                 jsonData.elements.forEach((unElemento)=>{
                     let text = unElemento.Text;
                     let path = unElemento.Path;
-                    if(path.includes('//Document/Table/TR[6]/TD[4]/P')){
+                    if(path.includes('//Document/Table/TR/TD/P[2]/Sub[2]')){
                         if(text.includes('España')){
                             paisVendedor = 'ESP';
-                        }else{
-                            paisVendedor = 'OTRO'
                         }
                     }
                 })
@@ -144,23 +142,24 @@
                 .then(resultados => {
                     // Unimos todos los resultados en un solo array
                     const todosLosResultados = [].concat(...resultados);
-    
                     // Obtenemos el tbody de la tabla
                     const tbody = document.getElementById('resultadosBody');
-    
                     // Limpiar los resultados previos
-                    tbody.innerHTML = '';
-    
+                    tbody.innerHTML = '';   
                     // Añadimos los resultados a la tabla
                     todosLosResultados.forEach((row, index) => {
                         const tr = document.createElement('tr');
+                        const colorFracc = row.NUM_FRACC ? 'background-color: #abebc6;' : 'background-color: #f1948a;'; 
+                        const valorMercancia = valoresMercancia[index] || 'No disponible';
+
                         tr.innerHTML = `
                         <td>${numFactura || 'No disponible'}</td>
                         <td>${fechaFactura}</td>
                         <td>${textoMonto}</td>
-                        <td>${row.NUM_PART}</td>
+                        <td>${row.NUM_PART || ' '}</td>
                         <td>${' '}</td>
                         <td>${paisVendedor}</td>
+                        <td style="${colorFracc}">${row.NUM_FRACC || ' '}</td>
                         <td>${row.DES_MERC}</td>
                         <td>${moneda}</td>
                         <td>${valoresMercancia[index]}</td>
@@ -183,6 +182,55 @@
         .catch(error => {
             console.error('Error al leer el archivo JSON:', error);
         });
+    </script>
+    <script>
+        function htmlExcel(idTabla, nombreArchivo = '') {
+            let linkDescarga;
+            let tipoDatos = 'application/vnd.ms-excel';
+            let tablaDatos = document.getElementById(idTabla);
+            let tablaHTML = tablaDatos.outerHTML;
+            
+            tablaHTML = tablaHTML.replace(/<th>/g, '<th style="background-color: blue; color: white; border: 1px solid rgb(255, 255, 255); height: 40px;">');
+            
+            // Aplicar formato de texto a todas las celdas
+            tablaHTML = tablaHTML.replace(/<td>([^<]*)<\/td>/g, function(match, p1) {
+              // Si la celda es un número de 8 dígitos con ceros, agregar el formato de texto
+              if (/^0{10}$/.test(p1)) {
+                  return '<td style="mso-number-format:\'\\@\';">' + p1 + '</td>';
+              } else {
+                  return '<td>' + p1 + '</td>';
+              }
+              });
+      
+            tablaHTML = tablaHTML.replace(/ /g, '%20');
+            // Nombre del archivo
+            nombreArchivo = nombreArchivo ? nombreArchivo + '.xls' : 'archivo.xlsx';
+      
+            // Crear el link de descarga
+            linkDescarga = document.createElement("a");
+      
+            document.body.appendChild(linkDescarga);
+      
+            if (navigator.msSaveOrOpenBlob) {
+              let blob = new Blob(['\ufeff', tablaHTML], {
+                type: tipoDatos
+              });
+              navigator.msSaveOrOpenBlob(blob, nombreArchivo);
+            } else {
+              // Crear el link al archivo
+              linkDescarga.href = 'data:' + tipoDatos + ', ' + tablaHTML;
+      
+              // Setear el nombre de archivo
+              linkDescarga.download = nombreArchivo;
+      
+              //Ejecutar la función
+              linkDescarga.click();
+            }
+          }
+
+          function downloadExcel() {
+            htmlExcel('resultadosTable', 'Layout_Generado');
+          }
     </script>
     
 </body>

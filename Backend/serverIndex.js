@@ -59,7 +59,7 @@ app.post('/data', (req, res) => {
         }
 
         //Consulta para obtener todos los registros donde CVE_PROV sea 'VER106'
-        db.query("SELECT DES_MERC, NUM_PART FROM CTRAC_FRACPAR WHERE CVE_PROV = 'VER106' AND NUM_PART = ?", text, (err, result) => {
+        db.query("SELECT fpar.DES_MERC, fpar.NUM_PART, fracc.NUM_FRACC FROM CTRAC_FRACPAR fpar JOIN CTRAC_FRACC fracc ON fpar.ID_FRACC = fracc.ID_FRACC WHERE fpar.CVE_PROV = 'VER106' AND NUM_PART = ?", text, (err, result) => {
             if (err) {
                 return res.status(500).send('Error al consultar');
             }
