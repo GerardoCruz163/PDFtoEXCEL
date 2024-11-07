@@ -6,7 +6,12 @@
     <title>Resultado de la Consulta</title>
 </head>
 <body>
-    <h1>Resultado de la Consulta</h1><img src="https://i.gifer.com/QHNs.gif" alt="">
+    <h1>Resultado de la Consulta</h1><img src="https://web.archive.org/web/20020607080704im_/http://elmanana.com.mx/imagenes/const3.gif" alt="">
+    <select name="Selecciona un Proveedor" class = "listaProveedores">
+        <option value="">Selecciona un proveedor</option>
+        <option value="EDITORIAL JUVENTUD">EDITORIAL JUVENTUD S.A.</option>
+        <option value="ZHONGSHAN SILK"> ZHONGSHAN SILK IMP. AND EXP. GROUP CO.</option>
+    </select>
     <button onclick="downloadExcel()">Descargar Excel</button>
     <table id="resultadosTable" border="1">
         <thead>
@@ -37,6 +42,7 @@
             return response.json();
         })
         .then(jsonData => {
+
             if (jsonData && jsonData.elements) {
                 var regex = /\d+/g; //extrae numeros
                 var regexFecha = /\b(0?[1-9]|[12][0-9]|3[01])[-\/](0?[1-9]|1[012])[-\/](\d{4})\b/;
@@ -44,7 +50,7 @@
                 //VARIABLES PARA EL MONTO TOTAL
                 var textoMonto = '';
                 var regexMonto = /\b\d{1,3},\d{1,2}\b/;
-                var valoresMercancia = [];//aqui almaceno los precios de cada producto                
+                var valoresMercancia = [];//Aqui se almacena los precios de cada producto                
                 //-- FORMATO --
                 //PROVEEDOR EDITORIAL JUVENTUD 'VER106'
                 //NUMERO DE FACTURA
@@ -72,6 +78,7 @@
                     let path = unElemento.Path;
                     if(path.includes('//Document/Table/TR[8]/TD[2]/P')){
                         //EXTRAIGO EL MONTO USANDO LA EXPRESION REGULAR
+                        text = text.replace(/[.,]/g, (match) => (match === ',' ? '.' : ','));
                         textoMonto = text;
                     }
                 });
@@ -81,6 +88,7 @@
                     let text = unElemento.Text || '';
                     let path = unElemento.Path || '';
                     if(path.includes('//Document/Table[') && path.includes(']/TR[') && path.includes(']/TD[6]/P')){
+                        text = text.replace(",", '.');
                         valoresMercancia.push(text);
                     }
                 });
@@ -109,9 +117,10 @@
                 //DESCRIPCION POR NUMERO DE PARTE (AQUI SE HACE LA CONSULTA A LA BASE DE DATOS)
                 const promesas = jsonData.elements.map((unElemento) =>{
                     let text = unElemento.Text || '';
-
+                    
 
                     let numerosParte = text.match(regex); //EXTRAIGO NUMEROS
+                    //let numerosParte = text;
                     //SI NO HAY NUMEROS DE PARTE SE DEVUELVE LA PROMESA
                     if (!numerosParte) {
                         return Promise.resolve([]); //SIGUE EL FLUJO
@@ -137,16 +146,15 @@
                     });
                 });
     
-                // Esperamos a que todas las promesas se resuelvan
+                
                 Promise.all(promesas)
                 .then(resultados => {
-                    // Unimos todos los resultados en un solo array
                     const todosLosResultados = [].concat(...resultados);
-                    // Obtenemos el tbody de la tabla
+                    
                     const tbody = document.getElementById('resultadosBody');
-                    // Limpiar los resultados previos
+                    
                     tbody.innerHTML = '';   
-                    // Añadimos los resultados a la tabla
+                    
                     todosLosResultados.forEach((row, index) => {
                         const tr = document.createElement('tr');
                         const colorFracc = row.NUM_FRACC ? 'background-color: #abebc6;' : 'background-color: #f1948a;'; 
@@ -164,10 +172,10 @@
                         <td>${moneda}</td>
                         <td>${valoresMercancia[index]}</td>
                         `;
-                        tbody.appendChild(tr); // Añadimos la fila a la tabla
+                        tbody.appendChild(tr); 
                     });
     
-                    // Si no hay resultados, mostramos un mensaje en la tabla
+                    
                     if (todosLosResultados.length === 0) {
                         const tr = document.createElement('tr');
                         tr.innerHTML = `<td colspan="2">No se encontraron resultados.</td>`;
@@ -178,6 +186,7 @@
                     console.error('Error al procesar los resultados:', error);
                 });
             }
+
         })
         .catch(error => {
             console.error('Error al leer el archivo JSON:', error);

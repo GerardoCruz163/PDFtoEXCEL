@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resultado de la Consulta</title>
+</head>
+<body>
+    <h1>Resultado de la Consulta</h1><img src="https://web.archive.org/web/20020607080704im_/http://elmanana.com.mx/imagenes/const3.gif" alt="">
+    <input class="inputFile1" type="file" id="fileUp-input" onchange="subir()" value="Cargar PDF">
+    <select name="Selecciona un Proveedor" class="listaProveedores" id="proveedorSelect">
+        <option value="">Selecciona un proveedor</option>
+        <option value="EDITORIAL JUVENTUD">EDITORIAL JUVENTUD S.A.</option>
+        <option value="ZHONGSHAN SILK"> ZHONGSHAN SILK IMP. AND EXP. GROUP CO.</option>
+    </select>
+    <button onclick="downloadExcel()">Descargar Excel</button>
+    <table id="resultadosTable" border="1">
+        <thead>
+            <tr>
+                <th>NO. FACTURA</th>
+                <th>FECHA FACTURA</th>
+                <th>MONTO FACTURA</th>
+                <th>NO. PARTE</th>
+                <th>PAIS ORIGEN</th>
+                <th>VENDEDOR</th>
+                <th>FRACCION</th>
+                <th>DESCRIPCION</th>
+                <th>MONEDA</th>
+                <th>VALOR DE LA MERCANCIA</th>
+            </tr>
+        </thead>
+        <tbody id="resultadosBody"></tbody>
+    </table>
+
+    <script>
+        //AQUI SE HACE EL RECORRIDO DE CADA PROVEEDOR SEGUN EL SELECCIONADO
+        function cargarDatosSegunProveedor(proveedor) {
+            fetch('./Backend/PDF_EXPORT.json')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('ERROR de Respuesta');
+                }
+                return response.json();
+            })
+            .then(jsonData => {
+                if (proveedor == "EDITORIAL JUVENTUD") { //EDITORIAL JUVENTUD
+                    // Formato para "EDITORIAL JUVENTUD S.A."
+                    if (jsonData && jsonData.elements) {
+                        var regex = /\d+/g; //extrae numeros
+                        var regexFecha = /\b(0?[1-9]|[12][0-9]|3[01])[-\/](0?[1-9]|1[012])[-\/](\d{4})\b/;
+                        let numFactura = '';
+                        //VARIABLES PARA EL MONTO TOTAL
+                        var textoMonto = '';
+                        var regexMonto = /\b\d{1,3},\d{1,2}\b/;
+                        var valoresMercancia = [];//Aqui se almacena los precios de cada producto                
+                        //-- FORMATO --
+                        //PROVEEDOR EDITORIAL JUVENTUD 'VER106'
+                        //NUMERO DE FACTURA
+                        jsonData.elements.forEach((unElemento) =>{
+                            let text = unElemento.Text || '';
+                            let path = unElemento.Path || '';
+                            if(path.includes('//Document/Table/TR[2]/TD[2]/P')){
+                                numFactura = text.match(regex);
+                            }
+                        });
+    
+                        //FECHA DE FACTURA
+                        let fechaFactura = '';
+                        jsonData.elements.forEach((unElemento)=>{
+                            let text = unElemento.Text;
+                            let path = unElemento.Path;
+                            if(path.includes('//Document/H1')){
+                                fechaFactura = text.match(regexFecha) ? text.match(regexFecha)[0] : '';
+                            }
+                        });
+    
+                        //MONTO DE LA FACTURA
+                        jsonData.elements.forEach((unElemento)=>{
+                            let text = unElemento.Text;
+                            let path = unElemento.Path;
+                            if(path.includes('//Document/Table/TR[8]/TD[2]/P')){
+                                //EXTRAIGO EL MONTO USANDO LA EXPRESION REGULAR
+                                text = text.replace(/[.,]/g, (match) => (match === ',' ? '.' : ','));
+                                textoMonto = text;
+                            }
+                        });
+    
+                        //VALOR DE LA MERCANCIA
+                        jsonData.elements.forEach((unElemento)=>{
+                            let text = unElemento.Text || '';
+                            let path = unElemento.Path || '';
+                            if(path.includes('//Document/Table[') && path.includes(']/TR[') && path.includes(']/TD[6]/P')){
+                                text = text.replace(",", '.');
+                                valoresMercancia.push(text);
+                            }
+                        });
+    
+                        //MONEDA
+                        let moneda= '';
+                        jsonData.elements.forEach((unElemento)=>{
+                            let text = unElemento.Text || '';
+                            if(text.includes('Eur') || text.includes('Euros')){
+                                moneda = 'EUR';
+                            }
+                        })
+    
+                        //PAIS VENDEDOR
+                        let paisVendedor = '';
+                        jsonData.elements.forEach((unElemento)=>{
+                            let text = unElemento.Text;
+                            let path = unElemento.Path;
+                            if(path.includes('//Document/Table/TR/TD/P[2]/Sub[2]')){
+                                if(text.includes('España')){
+                                    paisVendedor = 'ESP';
+                                }
+                            }
+                        })
+    
+                        //DESCRIPCION POR NUMERO DE PARTE (AQUI SE HACE LA CONSULTA A LA BASE DE DATOS)
+                        const promesas = jsonData.elements.map((unElemento) =>{
+                            let text = unElemento.Text || '';
+                        
+    
+                            let numerosParte = text.match(regex); //EXTRAIGO NUMEROS
+                            //let numerosParte = text;
+                            //SI NO HAY NUMEROS DE PARTE SE DEVUELVE LA PROMESA
+                            if (!numerosParte) {
+                                return Promise.resolve([]); //SIGUE EL FLUJO
+                            }
+                            //SI HAY NUMEROS DE PARTE HACE LA PETICION
+                            return fetch('http://localhost:8081/data', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({ text: numerosParte.join('') }), //ENVIA NUMEROS CONCATENADOS
+                            
+                            })
+                            .then(response => {
+                                if (!response.ok) {
+                                    throw new Error('Error en la respuesta del servidor');
+                                }
+                                return response.json();
+                            })
+                            .catch(error => {
+                                console.error('Error al obtener los datos:', error);
+                                return []; //SI HAY ERROR ENVIA EL ARREGLO VACIO Y CONTINUA CON EL TRABAJO
+                            });
+                        });
+        
+                        Promise.all(promesas)
+                        .then(resultados => {
+                            const todosLosResultados = [].concat(...resultados);
+                        
+                            const tbody = document.getElementById('resultadosBody');
+                        
+                            tbody.innerHTML = '';   
+                            
+                            todosLosResultados.forEach((row, index) => {
+                                const tr = document.createElement('tr');
+                                const colorFracc = row.NUM_FRACC ? 'background-color: #abebc6;' : 'background-color: #f1948a;'; 
+                                const valorMercancia = valoresMercancia[index] || 'No disponible';
+    
+                                tr.innerHTML = `
+                                <td>${numFactura || 'No disponible'}</td>
+                                <td>${fechaFactura}</td>
+                                <td>${textoMonto}</td>
+                                <td>${row.NUM_PART || ' '}</td>
+                                <td>${' '}</td>
+                                <td>${paisVendedor}</td>
+                                <td style="${colorFracc}">${row.NUM_FRACC || ' '}</td>
+                                <td>${row.DES_MERC}</td>
+                                <td>${moneda}</td>
+                                <td>${valoresMercancia[index]}</td>
+                                `;
+                                tbody.appendChild(tr); 
+                            });
+                            if (todosLosResultados.length === 0) {
+                                const tr = document.createElement('tr');
+                                tr.innerHTML = `<td colspan="2">No se encontraron resultados.</td>`;
+                                tbody.appendChild(tr);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error al procesar los resultados:', error);
+                        });
+                    }
+                } else if (proveedor === "ZHONGSHAN SILK") { //ZHONGSHAN SILK
+                    // Código para el nuevo formato de ZHONGSHAN SILK IMP. AND EXP. GROUP CO.
+                    console.log("Formato de ZHONGSHAN SILK ejecutado");
+                    // Implementa el nuevo formato aquí según tus necesidades
+                }
+            })
+            .catch(error => {
+                console.error('Error al leer el archivo JSON:', error);
+            });
+        }
+        document.addEventListener("DOMContentLoaded", function () {
+            const fileInput = document.getElementById("fileUp-input");
+            const proveedorSelect = document.getElementById("proveedorSelect");
+    
+            // Deshabilitar el campo de carga de archivos al cargar la página
+            fileInput.disabled = true;
+    
+            // Habilitar el campo de carga cuando se selecciona un proveedor
+            proveedorSelect.addEventListener("change", function () {
+                fileInput.disabled = !proveedorSelect.value; // Solo habilita si hay un proveedor seleccionado
+            });
+        });
+    
+        function subir() {
+            const fileInput = document.getElementById("fileUp-input");
+            const proveedorSelect = document.getElementById("proveedorSelect");
+            const proveedor = proveedorSelect.value;
+            const file = fileInput.files[0];
+    
+            if (!proveedor) {
+                alert("Por favor, selecciona un proveedor antes de subir el archivo.");
+                return;
+            }
+    
+            // Subir el archivo
+            const formData = new FormData();
+            formData.append('pdfFile', file);
+    
+            fetch('http://localhost:8081/upload', {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log("Archivo subido y procesado:", data);
+                cargarDatosSegunProveedor(proveedor);
+                // Procesar el archivo con el formato según el proveedor
+                /*if (proveedor === "EDITORIAL JUVENTUD") {
+                    cargarDatosSegunProveedor(proveedor);
+                    //procesarFormatoEditorialJuventud(data);
+                } else if (proveedor === "ZHONGSHAN SILK") {
+                    cargarDatosSegunProveedor(proveedor);
+                }*/
+            })
+            .catch(error => {
+                console.error("Error al subir el archivo:", error);
+            });
+        }
+    </script>
+
+    <script>//DESCARGAR ARCHIVO EXCEL
+        function htmlExcel(idTabla, nombreArchivo = '') {
+            let linkDescarga;
+            let tipoDatos = 'application/vnd.ms-excel';
+            let tablaDatos = document.getElementById(idTabla);
+            let tablaHTML = tablaDatos.outerHTML;
+    
+            tablaHTML = tablaHTML.replace(/<th>/g, '<th style="background-color: blue; color: white; border: 1px solid rgb(255, 255, 255); height: 40px;">');
+            
+            tablaHTML = tablaHTML.replace(/<td>([^<]*)<\/td>/g, function(match, p1) {
+                if (/^0{10}$/.test(p1)) {
+                    return '<td style="mso-number-format:\'\\@\';">' + p1 + '</td>';
+                } else {
+                    return '<td>' + p1 + '</td>';
+                }
+            });
+      
+            tablaHTML = tablaHTML.replace(/ /g, '%20');
+            nombreArchivo = nombreArchivo ? nombreArchivo + '.xls' : 'archivo.xlsx';
+    
+            linkDescarga = document.createElement("a");
+    
+            document.body.appendChild(linkDescarga);
+    
+            if (navigator.msSaveOrOpenBlob) {
+                let blob = new Blob(['\ufeff', tablaHTML], {
+                    type: tipoDatos
+                });
+                navigator.msSaveOrOpenBlob(blob, nombreArchivo);
+            } else {
+                linkDescarga.href = 'data:' + tipoDatos + ', ' + tablaHTML;
+                linkDescarga.download = nombreArchivo;
+                linkDescarga.click();
+            }
+        }
+    
+        function downloadExcel() {
+            htmlExcel('resultadosTable', 'Layout_Generado');
+        }
+
+    </script>
+
+    <script>//LISTENER PARA SELECCIONAR PROVEEDOR
+
+        //let proveedorSelec = '';
+    </script>  
+    
+</body>
+</html>

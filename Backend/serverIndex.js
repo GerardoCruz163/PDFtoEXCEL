@@ -100,6 +100,7 @@ app.post('/upload', upload.single('pdfFile'), async (req, res) => {
         if (!req.file) {
             return res.status(400).json({ message: 'No se ha proporcionado ningún archivo.' });
         }
+        res.status(200).json({ message: 'Archivo recibido correctamente.', file: req.file });
         //SE LEE EL ARCHIVO
         const fileBuffer = fs.readFileSync(filePath);
         //OBTENCION DEL TOKEN
@@ -230,7 +231,7 @@ async function uploadAsset(uploadUri, fileBuffer){
         console.error('Error al subir el archivo:', error.response ? error.response.data : error.message);
     }
 }
-//CARGA EL PDF DE EJEMPLO
+//CARGA EL PDF
 async function uploadSamplePDF() {
     try {
         const sampleFilePath = path.join(__dirname, '/uploads/ACT_IMP.pdf');
