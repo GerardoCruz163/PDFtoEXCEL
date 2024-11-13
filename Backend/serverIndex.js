@@ -47,7 +47,9 @@ const bddCredenciales = {
 
 //CONSULTA
 app.post('/data', (req, res) => {
-    const text = req.body.text; //recibo text del json que recibo
+    const { text, cveProveedor } = req.body;
+
+    //const text = req.body.text; //recibo text del json que recibo
     if (!/^\d+$/.test(text)) {
         return res.status(400).send('El numero de parte no es válido');
     }
@@ -59,12 +61,12 @@ app.post('/data', (req, res) => {
         }
 
         //Consulta para obtener todos los registros donde CVE_PROV sea 'VER106'
-        db.query("SELECT fpar.DES_MERC, fpar.NUM_PART, fracc.NUM_FRACC FROM CTRAC_FRACPAR fpar JOIN CTRAC_FRACC fracc ON fpar.ID_FRACC = fracc.ID_FRACC WHERE fpar.CVE_PROV = 'VER106' AND NUM_PART = ?", text, (err, result) => {
+        db.query("SELECT fpar.CVE_PROV, fpar.DES_MERC, fpar.NUM_PART, fracc.NUM_FRACC FROM CTRAC_FRACPAR fpar JOIN CTRAC_FRACC fracc ON fpar.ID_FRACC = fracc.ID_FRACC WHERE fpar.CVE_PROV = ? AND NUM_PART = ?", [cveProveedor, text], (err, result) => {
+            db.detach();
             if (err) {
                 return res.status(500).send('Error al consultar');
             }
             
-            db.detach();
 
             //Si hay resultados, los enviamos como JSON
             if (result.length > 0) {
@@ -100,7 +102,7 @@ app.post('/upload', upload.single('pdfFile'), async (req, res) => {
         if (!req.file) {
             return res.status(400).json({ message: 'No se ha proporcionado ningún archivo.' });
         }
-        res.status(200).json({ message: 'Archivo recibido correctamente.', file: req.file });
+        //res.status(200).json({ message: 'Archivo recibido correctamente.', file: req.file });
         //SE LEE EL ARCHIVO
         const fileBuffer = fs.readFileSync(filePath);
         //OBTENCION DEL TOKEN

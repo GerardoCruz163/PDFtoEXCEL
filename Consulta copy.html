@@ -17,6 +17,7 @@
     <table id="resultadosTable" border="1">
         <thead>
             <tr>
+                <th>CLAVE PROVEEDOR</th>
                 <th>NO. FACTURA</th>
                 <th>FECHA FACTURA</th>
                 <th>MONTO FACTURA</th>
@@ -44,8 +45,10 @@
             })
             .then(jsonData => {
                 if (proveedor == "EDITORIAL JUVENTUD") { //EDITORIAL JUVENTUD
+                    let cveProveedor = 'VER106';
                     // Formato para "EDITORIAL JUVENTUD S.A."
                     if (jsonData && jsonData.elements) {
+                        console.log('Proveedor: ', cveProveedor);
                         var regex = /\d+/g; //extrae numeros
                         var regexFecha = /\b(0?[1-9]|[12][0-9]|3[01])[-\/](0?[1-9]|1[012])[-\/](\d{4})\b/;
                         let numFactura = '';
@@ -133,7 +136,7 @@
                                 headers: {
                                     'Content-Type': 'application/json'
                                 },
-                                body: JSON.stringify({ text: numerosParte.join('') }), //ENVIA NUMEROS CONCATENADOS
+                                body: JSON.stringify({ cveProveedor, text: numerosParte.join('') }), //ENVIA NUMEROS CONCATENADOS
                             
                             })
                             .then(response => {
@@ -162,6 +165,7 @@
                                 const valorMercancia = valoresMercancia[index] || 'No disponible';
     
                                 tr.innerHTML = `
+                                <td>${cveProveedor}</td>
                                 <td>${numFactura || 'No disponible'}</td>
                                 <td>${fechaFactura}</td>
                                 <td>${textoMonto}</td>
@@ -186,9 +190,30 @@
                         });
                     }
                 } else if (proveedor === "ZHONGSHAN SILK") { //ZHONGSHAN SILK
-                    // Código para el nuevo formato de ZHONGSHAN SILK IMP. AND EXP. GROUP CO.
+                   
                     console.log("Formato de ZHONGSHAN SILK ejecutado");
-                    // Implementa el nuevo formato aquí según tus necesidades
+                    let cveProveedor = 'ZSI';
+                    if (jsonData && jsonData.elements) {
+                        console.log('Proveedor: ', cveProveedor);
+                        var regex = /\d+/g; //extrae numeros
+                        var regexFecha = /\b(0?[1-9]|[12][0-9]|3[01])[-\/](0?[1-9]|1[012])[-\/](\d{4})\b/;
+                        let numFactura = '';
+                        //VARIABLES PARA EL MONTO TOTAL
+                        var textoMonto = '';
+                        var regexMonto = /\b\d{1,3},\d{1,2}\b/;
+                        var valoresMercancia = [];
+                        
+                        jsonData.elements.forEach((unElemento)=>{
+                            let text = unElemento.Text;
+                            let path = unElemento.Path;
+                            if(path.includes('//Document/Table/TR/TD/P[2]/Sub[2]')){
+                                if(text.includes('España')){
+                                    numFactura = 'ESP';
+                                }
+                            }
+                        })
+
+                    }
                 }
             })
             .catch(error => {
@@ -230,14 +255,9 @@
             .then(response => response.json())
             .then(data => {
                 console.log("Archivo subido y procesado:", data);
-                cargarDatosSegunProveedor(proveedor);
-                // Procesar el archivo con el formato según el proveedor
-                /*if (proveedor === "EDITORIAL JUVENTUD") {
+                setTimeout(() => {
                     cargarDatosSegunProveedor(proveedor);
-                    //procesarFormatoEditorialJuventud(data);
-                } else if (proveedor === "ZHONGSHAN SILK") {
-                    cargarDatosSegunProveedor(proveedor);
-                }*/
+                }, 30000);
             })
             .catch(error => {
                 console.error("Error al subir el archivo:", error);
