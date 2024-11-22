@@ -12,6 +12,7 @@
         <option value="">Selecciona un proveedor</option>
         <option value="EDITORIAL JUVENTUD">EDITORIAL JUVENTUD S.A.</option>
         <option value="ZHONGSHAN SILK"> ZHONGSHAN SILK IMP. AND EXP. GROUP CO.</option>
+        <option value="NINGBO DYNACO HYDRAULIC">NINGBO DYNACO HYDRAULIC CO., LTD.</option>
     </select>
     <button onclick="downloadExcel()">Descargar Excel</button>
     <table id="resultadosTable" border="1">
@@ -21,13 +22,16 @@
                 <th>NO. FACTURA</th>
                 <th>FECHA FACTURA</th>
                 <th>MONTO FACTURA</th>
+                <th>MONEDA</th>
+                <th>INCOTERM</th>
+                <th>SUBDIVISION</th>
+                <th>CERT. ORIGEN</th>
                 <th>NO. PARTE</th>
                 <th>PAIS ORIGEN</th>
                 <th>VENDEDOR</th>
                 <th>FRACCION</th>
                 <th>DESCRIPCION</th>
                 <th>MONEDA</th>
-                <th>VALOR DE LA MERCANCIA</th>
             </tr>
         </thead>
         <tbody id="resultadosBody"></tbody>
@@ -169,6 +173,10 @@
                                 <td>${numFactura || 'No disponible'}</td>
                                 <td>${fechaFactura}</td>
                                 <td>${textoMonto}</td>
+                                <td>${''}</td>
+                                <td>${''}</td>
+                                <td>${''}</td>
+                                <td>${''}</td>
                                 <td>${row.NUM_PART || ' '}</td>
                                 <td>${' '}</td>
                                 <td>${paisVendedor}</td>
@@ -189,30 +197,231 @@
                             console.error('Error al procesar los resultados:', error);
                         });
                     }
-                } else if (proveedor === "ZHONGSHAN SILK") { //ZHONGSHAN SILK
+                } else if (proveedor == "ZHONGSHAN SILK") {                                //ZHONGSHAN SILK
                    
                     console.log("Formato de ZHONGSHAN SILK ejecutado");
                     let cveProveedor = 'ZSI';
                     if (jsonData && jsonData.elements) {
-                        console.log('Proveedor: ', cveProveedor);
-                        var regex = /\d+/g; //extrae numeros
-                        var regexFecha = /\b(0?[1-9]|[12][0-9]|3[01])[-\/](0?[1-9]|1[012])[-\/](\d{4})\b/;
                         let numFactura = '';
-                        //VARIABLES PARA EL MONTO TOTAL
-                        var textoMonto = '';
-                        var regexMonto = /\b\d{1,3},\d{1,2}\b/;
-                        var valoresMercancia = [];
+                        let numeroParte = '';
+
                         
+                        const promesas = jsonData.elements.map((unElemento) => {
+                            let text = unElemento.Text || '';
+                            let path = unElemento.Path || '';
+                            
+                            //VERIFICAR UBICACION DEL NUMERO DE PARTE
+                            if(path.includes('//Document/Sect[2]/Table/TR[') && path.includes(']/TD/P')){
+                                numeroParte = text.match(/\b[A-Z0-9]{6,10}\b/); // Extrae el primer número que encuentre
+                                    
+                                if (!numeroParte) {
+                                    return Promise.resolve([]);
+                                }   
+                                console.log('No Parte: ', numeroParte);
+                                //PETICION
+                                return fetch('http://localhost:8081/data', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json'
+                                    },
+                                    body: JSON.stringify({ cveProveedor, text: numeroParte }),
+                                })
+                                .then(response => {
+                                    if (!response.ok) {
+                                        console.log(response.statusText);
+                                        throw new Error('Error en la respuesta del servidor');
+                                    }
+                                    return response.json();
+                                })
+                                .catch(error => {
+                                    console.error('Error al obtener los datos:', error);
+                                    return []; //ARREGLO VACIO SI FALLA
+                                });
+                            }
+                            // Si el path no corresponde o no hay número de parte, devuelve una promesa vacía
+                            return Promise.resolve([]);
+                        });
+
+                        Promise.all(promesas)
+                        .then(resultados => {
+                            const todosLosResultados = [].concat(...resultados);
+
+                            const tbody = document.getElementById('resultadosBody');
+
+                            tbody.innerHTML = '';   
+                            
+                            todosLosResultados.forEach((row, index) =>{
+                                const tr = document.createElement('tr');
+                                const colorPart = row.NUM_PART ? 'background-color: #abebc6;' : 'background-color: #f1948a;';
+                                const colorFracc = row.NUM_FRACC ? 'background-color: #abebc6;' : 'background-color: #f1948a;';
+
+                                tr.innerHTML = `
+                                    <td>${cveProveedor}</td>
+                                    <td>${''}</td>
+                                    <td>${''}</td>
+                                    <td>${''}</td>
+                                    <td>${''}</td>
+                                    <td>${''}</td>
+                                    <td>${''}</td>
+                                    <td>${''}</td>
+                                    <td style="${colorPart}">${row.NUM_PART}</td>
+                                    <td>${' '}</td>
+                                    <td>${''}</td>
+                                    <td style="${colorFracc}">${row.NUM_FRACC || ' '}</td>
+                                    <td>${row.DES_MERC || ''}</td>
+                                    <td>${''}</td>
+                                    <td>${''}</td>
+                                `;
+                                tbody.appendChild(tr);
+                            });
+                            
+                            // Si no se encontró en la base de datos, aplicamos color rojo
+        
+                
+                            // Si no hay resultados, muestra un mensaje
+                            if (resultados.length === 0) {
+                                const tr = document.createElement('tr');
+                                tr.innerHTML = `<td colspan="2">No se encontraron resultados.</td>`;
+                                tbody.appendChild(tr);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error al procesar los resultados:', error);
+                        });
+                    }
+                }else if(proveedor == "NINGBO DYNACO HYDRAULIC"){           //NINGBO DYNACO HYDRAULIC
+                    console.log('Formato NINGBO DYNACO HYDRAULIC')
+                    let cveProveedor = 'TON23'
+                    let totalMonto = 0.0;
+                    //var valoresMercancia = [];
+                    if (jsonData && jsonData.elements){
+                        let numFactura = '';
+                        let fechaFactura = '';
+                        var regexFecha = /\b\d{4}-\d{2}-\d{2}$/;
+                        let moneda = 'USD';
+                        const numerosUnicos = new Set();
+
+                        //NUMERO DE FACTURA
                         jsonData.elements.forEach((unElemento)=>{
                             let text = unElemento.Text;
                             let path = unElemento.Path;
-                            if(path.includes('//Document/Table/TR/TD/P[2]/Sub[2]')){
-                                if(text.includes('España')){
-                                    numFactura = 'ESP';
-                                }
+                            if(path == '//Document/Sect[2]/P[3]/Sub'){
+                                let noFacturaSinEspacios = text.trim();
+                                let match = noFacturaSinEspacios.match(/[A-Z0-9\-]+$/);
+                                numFactura = match;
+                            }
+                        });
+                        //FECHA DE FACTURA
+                        jsonData.elements.forEach((unElemento)=>{
+                            let text = unElemento.Text;
+                            let path = unElemento.Path;
+                            if(path == '//Document/Sect[2]/P[3]/Sub[3]'){
+                                let fechaSinEspacios = text.replace(/\s+/g, '');
+                                let match = fechaSinEspacios.match(regexFecha);
+                                fechaFactura = match;
+                                console.log("Fecha de la factura: ", match);
+                            }
+                        });
+                        
+                        //monto total
+                        jsonData.elements.forEach((unElemento)=>{
+                            let text = unElemento.Text;
+                            let path = unElemento.Path;
+                            if(path == '//Document/Sect[2]/P[3]/Sub[3]'){
+                                let fechaSinEspacios = text.replace(/\s+/g, '');
+                                let match = fechaSinEspacios.match(regexFecha);
+                                fechaFactura = match;
+                                console.log("Fecha de la factura: ", match);
+                            }
+                        });
+
+                        //valor de la mercancia
+                        /*jsonData.elements.forEach((unElemento)=>{
+                            let text = unElemento.Text;
+                            let path = unElemento.Path;
+                            if(path.includes('//Document/Sect[2]/Table/TR[') && path.includes(']/TD[6]/P')){
+                                valoresMercancia.push(text);
+                            }
+                        })*/
+                        //NUMERO DE PARTE
+                        const promesas = jsonData.elements.map((unElemento) => {
+                            let text = unElemento.Text || '';
+                            let path = unElemento.Path || '';
+                            
+                            //VERIFICAR UBICACION DEL NUMERO DE PARTE
+                            if(path.includes('//Document/Sect[2]/Table/TR[') && path.includes(']/TD[3]/P')){
+                                let numeroParte = text.replace(/\s+/g, ''); 
+                                    
+                                if (!numeroParte) {
+                                    return Promise.resolve([]);
+                                }   
+
+                                console.log('No Parte: ', numeroParte);
+                                //PETICION
+                                return fetch('http://localhost:8081/data', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json'
+                                    },
+                                    body: JSON.stringify({ cveProveedor, text: numeroParte }),
+                                })
+                                .then(response => {
+                                    if (!response.ok) {
+                                        console.log(response.statusText);
+                                        throw new Error('Error en la respuesta del servidor');
+                                    }
+                                    return response.json();
+                                })
+                                .catch(error => {
+                                    console.error('Error al obtener los datos:', error);
+                                    return []; //ARREGLO VACIO SI FALLA
+                                });
+                            }
+                            // Si el path no corresponde o no hay número de parte, devuelve una promesa vacía
+                            return Promise.resolve([]);
+                        });
+
+                        Promise.all(promesas)
+                        .then(resultados => {
+                            const todosLosResultados = [].concat(...resultados);
+
+                            const tbody = document.getElementById('resultadosBody');
+
+                            tbody.innerHTML = '';   
+                            
+                            todosLosResultados.forEach((row, index) =>{
+                                const tr = document.createElement('tr');
+                                const colorPart = row.NUM_PART ? 'background-color: #abebc6;' : 'background-color: #f1948a;';
+
+                                tr.innerHTML = `
+                                    <td>${cveProveedor}</td>
+                                    <td>${numFactura}</td>
+                                    <td>${fechaFactura}</td>
+                                    <td>${''}</td>
+                                    <td>${moneda}</td>
+                                    <td>${''}</td>
+                                    <td>${''}</td>
+                                    <td>${''}</td>
+                                    <td style="${colorPart}">${row.NUM_PART}</td>
+                                    <td>${' '}</td>
+                                    <td>${''}</td>
+                                    <td>${row.NUM_FRACC || ' '}</td>
+                                    <td>${row.DES_MERC || ''}</td>
+                                    <td>${''}</td>
+                                    <td>${''}</td>
+                                `;
+                                tbody.appendChild(tr);
+                            });
+                            // Si no hay resultados, muestra un mensaje
+                            if (resultados.length === 0) {
+                                const tr = document.createElement('tr');
+                                tr.innerHTML = `<td colspan="2">No se encontraron resultados.</td>`;
+                                tbody.appendChild(tr);
                             }
                         })
-
+                        .catch(error => {
+                            console.error('Error al procesar los resultados:', error);
+                        });
                     }
                 }
             })
@@ -306,11 +515,6 @@
         }
 
     </script>
-
-    <script>//LISTENER PARA SELECCIONAR PROVEEDOR
-
-        //let proveedorSelec = '';
-    </script>  
     
 </body>
 </html>

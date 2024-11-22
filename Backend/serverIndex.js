@@ -37,7 +37,7 @@ let downloadURI='';
 let jsonGenerado='';
 
 const bddCredenciales = {
-    host: 'tlserver',
+    host: '192.168.10.69',
     port: 3050,
     database: 'C:/CASAWIN/CSAAIWIN/Datos/CASA.GDB',
     user: 'Admin',
@@ -45,35 +45,64 @@ const bddCredenciales = {
     pageSize: 4096
 };
 
+
+const numPartSet = new Set();
 //CONSULTA
 app.post('/data', (req, res) => {
     const { text, cveProveedor } = req.body;
 
-    //const text = req.body.text; //recibo text del json que recibo
-    if (!/^\d+$/.test(text)) {
-        return res.status(400).send('El numero de parte no es válido');
+    if(cveProveedor == 'VER106'){
+        if (!/^\d+$/.test(text)) {
+            return res.status(400).send('El numero de parte no es válido');
+        }
+    }else if(cveProveedor == 'ZSI'){
+        if (!/\b[A-Z0-9]{6,10}\b/.test(text)) {
+            return res.status(400).send('El numero de parte no es válido');
+        }
+    }else if(cveProveedor == 'TON23'){
+        if (!/^\d+(-\d+)?$/.test(text) && !/^[A-Z0-9-]{6,25}$/.test(text)) {
+            return res.status(400).send('El numero de parte no es válido');
+        }
+        console.log("TON23 verificado");
     }
-    // Conexion a la base de datos
+    
+    
     firebird.attach(bddCredenciales, (err, db) => {
         if (err) {
             console.log(err);
             return res.status(500).send('No se pudo conectar a la base de datos');
         }
 
+        console.log("Conexion establecida a la base de datos");
         //Consulta para obtener todos los registros donde CVE_PROV sea 'VER106'
         db.query("SELECT fpar.CVE_PROV, fpar.DES_MERC, fpar.NUM_PART, fracc.NUM_FRACC FROM CTRAC_FRACPAR fpar JOIN CTRAC_FRACC fracc ON fpar.ID_FRACC = fracc.ID_FRACC WHERE fpar.CVE_PROV = ? AND NUM_PART = ?", [cveProveedor, text], (err, result) => {
-            db.detach();
             if (err) {
                 return res.status(500).send('Error al consultar');
             }
             
+            db.detach();
 
-            //Si hay resultados, los enviamos como JSON
-            if (result.length > 0) {
-                res.json(result); // Enviar los resultados como un objeto JSON
+            const filteredResults = result.filter((row) => {
+                if (numPartSet.has(row.NUM_PART)) {
+                    return false;
+                } else {
+                    numPartSet.add(row.NUM_PART);
+                    return true; 
+                }
+            });
+
+             //Si hay resultados, los enviamos como JSON
+             if (filteredResults.length > 0) {
+                res.json(filteredResults); 
             } else {
-                res.json([]); // Enviar un array vacío si no hay resultados
+                res.json([]); 
             }
+            
+            /*if (result.length === 0) {
+                return res.json([{ NUM_PART: text, DES_MERC: 'No encontrad', CVE_PROV: cveProveedor, NUM_FRACC: '' }]);
+            
+            }
+            res.json(result);*/
         });
     });
 });
