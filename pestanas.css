@@ -73,7 +73,7 @@ background: linear-gradient(85deg, rgba(47,25,106,1) 0%, rgba(28,38,80,1) 22%, r
 }
 
 /* Estilo para la tabla de datos */
-.tablaD {
+.resultadosTable {
   border: 2px solid #77c5be;
   border-radius: 20px;
   overflow-y: auto;
@@ -146,13 +146,13 @@ background: linear-gradient(85deg, rgba(47,25,106,1) 0%, rgba(28,38,80,1) 22%, r
 }
 
 /* Estilo para la tabla de datos */
-.tablaDatos {
+.resultadosTable {
   width: 100px;
   border-collapse: collapse;
   background-color: #ffffffb9;
 }
 
-.tablaDatos th {
+.resultadosTable th {
   border: 1px solid #2ec0b4;
   padding: 4px 15px;
   text-align: center;
@@ -162,7 +162,7 @@ background: linear-gradient(85deg, rgba(47,25,106,1) 0%, rgba(28,38,80,1) 22%, r
   position: sticky;
 }
 
-.tablaDatos td {
+.resultadosTable td {
   border: 1px solid #8a8a8a;
   padding: 8px;
   text-align: left;

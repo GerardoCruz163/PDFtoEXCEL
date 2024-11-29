@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Resultado de la Consulta</title>
+    <title>TLA: PDF a Layout</title>
 </head>
 <body>
     <h1>Resultado de la Consulta</h1><img src="https://web.archive.org/web/20020607080704im_/http://elmanana.com.mx/imagenes/const3.gif" alt="">
@@ -15,6 +15,7 @@
         <option value="NINGBO DYNACO HYDRAULIC">NINGBO DYNACO HYDRAULIC CO., LTD.</option>
     </select>
     <button onclick="downloadExcel()">Descargar Excel</button>
+
     <table id="resultadosTable" border="1">
         <thead>
             <tr>
@@ -31,7 +32,17 @@
                 <th>VENDEDOR</th>
                 <th>FRACCION</th>
                 <th>DESCRIPCION</th>
-                <th>MONEDA</th>
+                <th>VALOR MERCANCIA</th>
+                <th>UMC</th>
+                <th>CANTIDAD DE UMC</th>
+                <th>CANTIDAD DE UMT</th>
+                <th>REFERENCIA ARANCELARIA</th>
+                <th>Marca</th>
+                <th>Submodelo</th>
+                <th>No. Serie</th>
+                <th>VALORACION</th>
+                <th>TIPO DE MERCAN</th>
+                <th>VINCULACION</th>
             </tr>
         </thead>
         <tbody id="resultadosBody"></tbody>
@@ -59,7 +70,8 @@
                         //VARIABLES PARA EL MONTO TOTAL
                         var textoMonto = '';
                         var regexMonto = /\b\d{1,3},\d{1,2}\b/;
-                        var valoresMercancia = [];//Aqui se almacena los precios de cada producto                
+                        var valoresMercancia = [];//Aqui se almacena los precios de cada producto       
+                        let cantidadUMC = [];         
                         //-- FORMATO --
                         //PROVEEDOR EDITORIAL JUVENTUD 'VER106'
                         //NUMERO DE FACTURA
@@ -110,6 +122,14 @@
                                 moneda = 'EUR';
                             }
                         })
+
+                        let incoterm= '';
+                        jsonData.elements.forEach((unElemento)=>{
+                            let text = unElemento.Text || '';
+                            if(text.includes('CIF')){
+                                incoterm = 'CIF';
+                            }
+                        })
     
                         //PAIS VENDEDOR
                         let paisVendedor = '';
@@ -122,14 +142,22 @@
                                 }
                             }
                         })
+
+                        //CANTIDAD DE UMC
+                        jsonData.elements.forEach((unElemento)=>{
+                            let text = unElemento.Text;
+                            let path = unElemento.Path;
+                            if(path.includes('//Document/Table[2]/TR[') && path.includes(']/TD/P')){
+                                cantidadUMC.push(text);
+                            }
+                        })
     
                         //DESCRIPCION POR NUMERO DE PARTE (AQUI SE HACE LA CONSULTA A LA BASE DE DATOS)
                         const promesas = jsonData.elements.map((unElemento) =>{
                             let text = unElemento.Text || '';
                         
-    
                             let numerosParte = text.match(regex); //EXTRAIGO NUMEROS
-                            //let numerosParte = text;
+        
                             //SI NO HAY NUMEROS DE PARTE SE DEVUELVE LA PROMESA
                             if (!numerosParte) {
                                 return Promise.resolve([]); //SIGUE EL FLUJO
@@ -161,7 +189,7 @@
                         
                             const tbody = document.getElementById('resultadosBody');
                         
-                            tbody.innerHTML = '';   
+                            tbody.innerHTML = '';
                             
                             todosLosResultados.forEach((row, index) => {
                                 const tr = document.createElement('tr');
@@ -173,19 +201,20 @@
                                 <td>${numFactura || 'No disponible'}</td>
                                 <td>${fechaFactura}</td>
                                 <td>${textoMonto}</td>
-                                <td>${''}</td>
-                                <td>${''}</td>
+                                <td>${moneda}</td>
+                                <td>${incoterm}</td>
                                 <td>${''}</td>
                                 <td>${''}</td>
                                 <td>${row.NUM_PART || ' '}</td>
-                                <td>${' '}</td>
+                                <td>${paisVendedor}</td>
                                 <td>${paisVendedor}</td>
                                 <td style="${colorFracc}">${row.NUM_FRACC || ' '}</td>
                                 <td>${row.DES_MERC}</td>
-                                <td>${moneda}</td>
                                 <td>${valoresMercancia[index]}</td>
+                                <td>${''}</td>
+                                <td>${cantidadUMC[index]}</td>
                                 `;
-                                tbody.appendChild(tr); 
+                                tbody.appendChild(tr);
                             });
                             if (todosLosResultados.length === 0) {
                                 const tr = document.createElement('tr');
@@ -293,7 +322,9 @@
                     console.log('Formato NINGBO DYNACO HYDRAULIC')
                     let cveProveedor = 'TON23'
                     let totalMonto = 0.0;
-                    //var valoresMercancia = [];
+                    let valoresMercancia = [];
+                    let cantidadUMC = [];
+                    let incoterm = 'CIF'
                     if (jsonData && jsonData.elements){
                         let numFactura = '';
                         let fechaFactura = '';
@@ -323,7 +354,7 @@
                             }
                         });
                         
-                        //monto total
+                        //fecha factura
                         jsonData.elements.forEach((unElemento)=>{
                             let text = unElemento.Text;
                             let path = unElemento.Path;
@@ -335,14 +366,24 @@
                             }
                         });
 
+                        
                         //valor de la mercancia
-                        /*jsonData.elements.forEach((unElemento)=>{
+                        jsonData.elements.forEach((unElemento)=>{
                             let text = unElemento.Text;
                             let path = unElemento.Path;
                             if(path.includes('//Document/Sect[2]/Table/TR[') && path.includes(']/TD[6]/P')){
                                 valoresMercancia.push(text);
                             }
-                        })*/
+                        })
+
+                        //CANTIDAD DE UMC
+                        jsonData.elements.forEach((unElemento)=>{
+                            let text = unElemento.Text;
+                            let path = unElemento.Path;
+                            if(path.includes('//Document/Sect[2]/Table/TR[') && path.includes(']/TD[4]/P')){
+                                cantidadUMC.push(text);
+                            }
+                        })
                         //NUMERO DE PARTE
                         const promesas = jsonData.elements.map((unElemento) => {
                             let text = unElemento.Text || '';
@@ -399,16 +440,17 @@
                                     <td>${fechaFactura}</td>
                                     <td>${''}</td>
                                     <td>${moneda}</td>
+                                    <td>${incoterm}</td>
                                     <td>${''}</td>
-                                    <td>${''}</td>
-                                    <td>${''}</td>
-                                    <td style="${colorPart}">${row.NUM_PART}</td>
+                                    <td>${''}</td>  
+                                    <td>${row.NUM_PART}</td>
                                     <td>${' '}</td>
                                     <td>${''}</td>
-                                    <td>${row.NUM_FRACC || ' '}</td>
+                                    <td style="${colorPart}">${row.NUM_FRACC || ' '}</td>
                                     <td>${row.DES_MERC || ''}</td>
+                                    <td>${valoresMercancia[index]}</td>
                                     <td>${''}</td>
-                                    <td>${''}</td>
+                                    <td>${cantidadUMC[index]}</td>
                                 `;
                                 tbody.appendChild(tr);
                             });
@@ -463,7 +505,7 @@
             })
             .then(response => response.json())
             .then(data => {
-                console.log("Archivo subido y procesado:", data);
+                console.log("Archivo subido:", data);
                 setTimeout(() => {
                     cargarDatosSegunProveedor(proveedor);
                 }, 30000);
@@ -475,43 +517,57 @@
     </script>
 
     <script>//DESCARGAR ARCHIVO EXCEL
-        function htmlExcel(idTabla, nombreArchivo = '') {
-            let linkDescarga;
-            let tipoDatos = 'application/vnd.ms-excel';
-            let tablaDatos = document.getElementById(idTabla);
-            let tablaHTML = tablaDatos.outerHTML;
-    
-            tablaHTML = tablaHTML.replace(/<th>/g, '<th style="background-color: blue; color: white; border: 1px solid rgb(255, 255, 255); height: 40px;">');
-            
-            tablaHTML = tablaHTML.replace(/<td>([^<]*)<\/td>/g, function(match, p1) {
-                if (/^0{10}$/.test(p1)) {
-                    return '<td style="mso-number-format:\'\\@\';">' + p1 + '</td>';
-                } else {
-                    return '<td>' + p1 + '</td>';
-                }
-            });
-      
-            tablaHTML = tablaHTML.replace(/ /g, '%20');
-            nombreArchivo = nombreArchivo ? nombreArchivo + '.xls' : 'archivo.xlsx';
-    
-            linkDescarga = document.createElement("a");
-    
-            document.body.appendChild(linkDescarga);
-    
-            if (navigator.msSaveOrOpenBlob) {
-                let blob = new Blob(['\ufeff', tablaHTML], {
-                    type: tipoDatos
-                });
-                navigator.msSaveOrOpenBlob(blob, nombreArchivo);
-            } else {
-                linkDescarga.href = 'data:' + tipoDatos + ', ' + tablaHTML;
-                linkDescarga.download = nombreArchivo;
-                linkDescarga.click();
+        function htmlExcel(idTabla, nombreArchivo = 'archivo.xlsx') {
+            const tipoDatos = 'application/vnd.ms-excel;charset=utf-8;';
+            const tablaDatos = document.getElementById(idTabla);
+            if (!tablaDatos) {
+                alert('La tabla no existe o no tiene datos.');
+                return;
             }
+        
+            let tablaHTML = `
+            <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+            <head><!--[if gte mso 9]><xml>
+            <x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet>
+            <x:Name>Hoja1</x:Name>
+            <x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions>
+            </x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook>
+            </xml><![endif]-->
+            <style>
+                th {
+                    background-color: green;
+                    color: white;
+                    text-align: center;
+                    border: 0px solid #ffffff;
+                    height: 20px;
+                }
+                td {
+                    border: 0px solid #000000;
+                }
+            </style>
+            </head>
+            <body><table>${tablaDatos.innerHTML}</table></body></html>`;
+        
+            const blob = new Blob([tablaHTML], { type: tipoDatos });
+        
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = nombreArchivo;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
     
         function downloadExcel() {
-            htmlExcel('resultadosTable', 'Layout_Generado');
+            let now = new Date();
+            //Formatear la fecha y hora
+            let formattedDate = now.toISOString().slice(0, 10);
+            let formattedTime = now.toTimeString().slice(0, 8).replace(/:/g, '-');
+            let timestamp = `${formattedDate}_${formattedTime}`;
+
+            //Concatenar al nombre del archivo
+            let fileName = `layout_${timestamp}`;
+            htmlExcel('resultadosTable', fileName);
         }
 
     </script>
