@@ -3,247 +3,573 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Resultado de la Consulta</title>
+    <title>TLA: PDF a Layout</title>
 </head>
 <body>
     <h1>Resultado de la Consulta</h1><img src="https://web.archive.org/web/20020607080704im_/http://elmanana.com.mx/imagenes/const3.gif" alt="">
-    <select name="Selecciona un Proveedor" class = "listaProveedores">
+    <input class="inputFile1" type="file" id="fileUp-input" onchange="subir()" value="Cargar PDF">
+    <select name="Selecciona un Proveedor" class="listaProveedores" id="proveedorSelect">
         <option value="">Selecciona un proveedor</option>
         <option value="EDITORIAL JUVENTUD">EDITORIAL JUVENTUD S.A.</option>
         <option value="ZHONGSHAN SILK"> ZHONGSHAN SILK IMP. AND EXP. GROUP CO.</option>
+        <option value="NINGBO DYNACO HYDRAULIC">NINGBO DYNACO HYDRAULIC CO., LTD.</option>
     </select>
     <button onclick="downloadExcel()">Descargar Excel</button>
+
     <table id="resultadosTable" border="1">
         <thead>
             <tr>
+                <th>CLAVE PROVEEDOR</th>
                 <th>NO. FACTURA</th>
                 <th>FECHA FACTURA</th>
                 <th>MONTO FACTURA</th>
+                <th>MONEDA</th>
+                <th>INCOTERM</th>
+                <th>SUBDIVISION</th>
+                <th>CERT. ORIGEN</th>
                 <th>NO. PARTE</th>
                 <th>PAIS ORIGEN</th>
                 <th>VENDEDOR</th>
                 <th>FRACCION</th>
                 <th>DESCRIPCION</th>
-                <th>MONEDA</th>
-                <th>VALOR DE LA MERCANCIA</th>
+                <th>VALOR MERCANCIA</th>
+                <th>UMC</th>
+                <th>CANTIDAD DE UMC</th>
+                <th>CANTIDAD DE UMT</th>
+                <th>REFERENCIA ARANCELARIA</th>
+                <th>Marca</th>
+                <th>Submodelo</th>
+                <th>No. Serie</th>
+                <th>VALORACION</th>
+                <th>TIPO DE MERCAN</th>
+                <th>VINCULACION</th>
             </tr>
         </thead>
-        <tbody id="resultadosBody">
-            
-        </tbody>
+        <tbody id="resultadosBody"></tbody>
     </table>
 
     <script>
-        fetch('./Backend/PDF_EXPORT.json')
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('ERROR de Respuesta');
-            }
-            return response.json();
-        })
-        .then(jsonData => {
-
-            if (proveedor == "EDITORIAL JUVENTUD") { //EDITORIAL JUVENTUD
-                // Formato para "EDITORIAL JUVENTUD S.A."
-                if (jsonData && jsonData.elements) {
-                    var regex = /\d+/g; //extrae numeros
-                    var regexFecha = /\b(0?[1-9]|[12][0-9]|3[01])[-\/](0?[1-9]|1[012])[-\/](\d{4})\b/;
-                    let numFactura = '';
-                    //VARIABLES PARA EL MONTO TOTAL
-                    var textoMonto = '';
-                    var regexMonto = /\b\d{1,3},\d{1,2}\b/;
-                    var valoresMercancia = [];//Aqui se almacena los precios de cada producto                
-                    //-- FORMATO --
-                    //PROVEEDOR EDITORIAL JUVENTUD 'VER106'
-                    //NUMERO DE FACTURA
-                    jsonData.elements.forEach((unElemento) =>{
-                        let text = unElemento.Text || '';
-                        let path = unElemento.Path || '';
-                        if(path.includes('//Document/Table/TR[2]/TD[2]/P')){
-                            numFactura = text.match(regex);
-                        }
-                    });
-
-                    //FECHA DE FACTURA
-                    let fechaFactura = '';
-                    jsonData.elements.forEach((unElemento)=>{
-                        let text = unElemento.Text;
-                        let path = unElemento.Path;
-                        if(path.includes('//Document/H1')){
-                            fechaFactura = text.match(regexFecha) ? text.match(regexFecha)[0] : '';
-                        }
-                    });
-
-                    //MONTO DE LA FACTURA
-                    jsonData.elements.forEach((unElemento)=>{
-                        let text = unElemento.Text;
-                        let path = unElemento.Path;
-                        if(path.includes('//Document/Table/TR[8]/TD[2]/P')){
-                            //EXTRAIGO EL MONTO USANDO LA EXPRESION REGULAR
-                            text = text.replace(/[.,]/g, (match) => (match === ',' ? '.' : ','));
-                            textoMonto = text;
-                        }
-                    });
-
-                    //VALOR DE LA MERCANCIA
-                    jsonData.elements.forEach((unElemento)=>{
-                        let text = unElemento.Text || '';
-                        let path = unElemento.Path || '';
-                        if(path.includes('//Document/Table[') && path.includes(']/TR[') && path.includes(']/TD[6]/P')){
-                            text = text.replace(",", '.');
-                            valoresMercancia.push(text);
-                        }
-                    });
-
-                    //MONEDA
-                    let moneda= '';
-                    jsonData.elements.forEach((unElemento)=>{
-                        let text = unElemento.Text || '';
-                        if(text.includes('Eur') || text.includes('Euros')){
-                            moneda = 'EUR';
-                        }
-                    })
-
-                    //PAIS VENDEDOR
-                    let paisVendedor = '';
-                    jsonData.elements.forEach((unElemento)=>{
-                        let text = unElemento.Text;
-                        let path = unElemento.Path;
-                        if(path.includes('//Document/Table/TR/TD/P[2]/Sub[2]')){
-                            if(text.includes('España')){
-                                paisVendedor = 'ESP';
+        //AQUI SE HACE EL RECORRIDO DE CADA PROVEEDOR SEGUN EL SELECCIONADO
+        function cargarDatosSegunProveedor(proveedor) {
+            fetch('./Backend/PDF_EXPORT.json')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('ERROR de Respuesta');
+                }
+                return response.json();
+            })
+            .then(jsonData => {
+                if (proveedor == "EDITORIAL JUVENTUD") { //EDITORIAL JUVENTUD
+                    let cveProveedor = 'VER106';
+                    // Formato para "EDITORIAL JUVENTUD S.A."
+                    if (jsonData && jsonData.elements) {
+                        console.log('Proveedor: ', cveProveedor);
+                        var regex = /\d+/g; //extrae numeros
+                        var regexFecha = /\b(0?[1-9]|[12][0-9]|3[01])[-\/](0?[1-9]|1[012])[-\/](\d{4})\b/;
+                        let numFactura = '';
+                        //VARIABLES PARA EL MONTO TOTAL
+                        var textoMonto = '';
+                        var regexMonto = /\b\d{1,3},\d{1,2}\b/;
+                        var valoresMercancia = [];//Aqui se almacena los precios de cada producto       
+                        let cantidadUMC = [];         
+                        //-- FORMATO --
+                        //PROVEEDOR EDITORIAL JUVENTUD 'VER106'
+                        //NUMERO DE FACTURA
+                        jsonData.elements.forEach((unElemento) =>{
+                            let text = unElemento.Text || '';
+                            let path = unElemento.Path || '';
+                            if(path.includes('//Document/Table/TR[2]/TD[2]/P')){
+                                numFactura = text.match(regex);
                             }
-                        }
-                    })
-
-                    //DESCRIPCION POR NUMERO DE PARTE (AQUI SE HACE LA CONSULTA A LA BASE DE DATOS)
-                    const promesas = jsonData.elements.map((unElemento) =>{
-                        let text = unElemento.Text || '';
-                    
-
-                        let numerosParte = text.match(regex); //EXTRAIGO NUMEROS
-                        //let numerosParte = text;
-                        //SI NO HAY NUMEROS DE PARTE SE DEVUELVE LA PROMESA
-                        if (!numerosParte) {
-                            return Promise.resolve([]); //SIGUE EL FLUJO
-                        }
-                        //SI HAY NUMEROS DE PARTE HACE LA PETICION
-                        return fetch('http://localhost:8081/data', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({ text: numerosParte.join('') }), //ENVIA NUMEROS CONCATENADOS
-                        
+                        });
+    
+                        //FECHA DE FACTURA
+                        let fechaFactura = '';
+                        jsonData.elements.forEach((unElemento)=>{
+                            let text = unElemento.Text;
+                            let path = unElemento.Path;
+                            if(path.includes('//Document/H1')){
+                                fechaFactura = text.match(regexFecha) ? text.match(regexFecha)[0] : '';
+                            }
+                        });
+    
+                        //MONTO DE LA FACTURA
+                        jsonData.elements.forEach((unElemento)=>{
+                            let text = unElemento.Text;
+                            let path = unElemento.Path;
+                            if(path.includes('//Document/Table/TR[8]/TD[2]/P')){
+                                //EXTRAIGO EL MONTO USANDO LA EXPRESION REGULAR
+                                text = text.replace(/[.,]/g, (match) => (match === ',' ? '.' : ','));
+                                textoMonto = text;
+                            }
+                        });
+    
+                        //VALOR DE LA MERCANCIA
+                        jsonData.elements.forEach((unElemento)=>{
+                            let text = unElemento.Text || '';
+                            let path = unElemento.Path || '';
+                            if(path.includes('//Document/Table[') && path.includes(']/TR[') && path.includes(']/TD[6]/P')){
+                                text = text.replace(",", '.');
+                                valoresMercancia.push(text);
+                            }
+                        });
+    
+                        //MONEDA
+                        let moneda= '';
+                        jsonData.elements.forEach((unElemento)=>{
+                            let text = unElemento.Text || '';
+                            if(text.includes('Eur') || text.includes('Euros')){
+                                moneda = 'EUR';
+                            }
                         })
-                        .then(response => {
-                            if (!response.ok) {
-                                throw new Error('Error en la respuesta del servidor');
+
+                        let incoterm= '';
+                        jsonData.elements.forEach((unElemento)=>{
+                            let text = unElemento.Text || '';
+                            if(text.includes('CIF')){
+                                incoterm = 'CIF';
                             }
-                            return response.json();
+                        })
+    
+                        //PAIS VENDEDOR
+                        let paisVendedor = '';
+                        jsonData.elements.forEach((unElemento)=>{
+                            let text = unElemento.Text;
+                            let path = unElemento.Path;
+                            if(path.includes('//Document/Table/TR/TD/P[2]/Sub[2]')){
+                                if(text.includes('España')){
+                                    paisVendedor = 'ESP';
+                                }
+                            }
+                        })
+
+                        //CANTIDAD DE UMC
+                        jsonData.elements.forEach((unElemento)=>{
+                            let text = unElemento.Text;
+                            let path = unElemento.Path;
+                            if(path.includes('//Document/Table[2]/TR[') && path.includes(']/TD/P')){
+                                cantidadUMC.push(text);
+                            }
+                        })
+    
+                        //DESCRIPCION POR NUMERO DE PARTE (AQUI SE HACE LA CONSULTA A LA BASE DE DATOS)
+                        const promesas = jsonData.elements.map((unElemento) =>{
+                            let text = unElemento.Text || '';
+                        
+                            let numerosParte = text.match(regex); //EXTRAIGO NUMEROS
+        
+                            //SI NO HAY NUMEROS DE PARTE SE DEVUELVE LA PROMESA
+                            if (!numerosParte) {
+                                return Promise.resolve([]); //SIGUE EL FLUJO
+                            }
+                            //SI HAY NUMEROS DE PARTE HACE LA PETICION
+                            return fetch('http://localhost:8081/data', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({ cveProveedor, text: numerosParte.join('') }), //ENVIA NUMEROS CONCATENADOS
+                            
+                            })
+                            .then(response => {
+                                if (!response.ok) {
+                                    throw new Error('Error en la respuesta del servidor');
+                                }
+                                return response.json();
+                            })
+                            .catch(error => {
+                                console.error('Error al obtener los datos:', error);
+                                return []; //SI HAY ERROR ENVIA EL ARREGLO VACIO Y CONTINUA CON EL TRABAJO
+                            });
+                        });
+        
+                        Promise.all(promesas)
+                        .then(resultados => {
+                            const todosLosResultados = [].concat(...resultados);
+                        
+                            const tbody = document.getElementById('resultadosBody');
+                        
+                            tbody.innerHTML = '';
+                            
+                            todosLosResultados.forEach((row, index) => {
+                                const tr = document.createElement('tr');
+                                const colorFracc = row.NUM_FRACC ? 'background-color: #abebc6;' : 'background-color: #f1948a;'; 
+                                const valorMercancia = valoresMercancia[index] || 'No disponible';
+    
+                                tr.innerHTML = `
+                                <td>${cveProveedor}</td>
+                                <td>${numFactura || 'No disponible'}</td>
+                                <td>${fechaFactura}</td>
+                                <td>${textoMonto}</td>
+                                <td>${moneda}</td>
+                                <td>${incoterm}</td>
+                                <td>${''}</td>
+                                <td>${''}</td>
+                                <td>${row.NUM_PART || ' '}</td>
+                                <td>${paisVendedor}</td>
+                                <td>${paisVendedor}</td>
+                                <td style="${colorFracc}">${row.NUM_FRACC || ' '}</td>
+                                <td>${row.DES_MERC}</td>
+                                <td>${valoresMercancia[index]}</td>
+                                <td>${''}</td>
+                                <td>${cantidadUMC[index]}</td>
+                                `;
+                                tbody.appendChild(tr);
+                            });
+                            if (todosLosResultados.length === 0) {
+                                const tr = document.createElement('tr');
+                                tr.innerHTML = `<td colspan="2">No se encontraron resultados.</td>`;
+                                tbody.appendChild(tr);
+                            }
                         })
                         .catch(error => {
-                            console.error('Error al obtener los datos:', error);
-                            return []; //SI HAY ERROR ENVIA EL ARREGLO VACIO Y CONTINUA CON EL TRABAJO
+                            console.error('Error al procesar los resultados:', error);
                         });
-                    });
-    
-                    Promise.all(promesas)
-                    .then(resultados => {
-                        const todosLosResultados = [].concat(...resultados);
-                    
-                        const tbody = document.getElementById('resultadosBody');
-                    
-                        tbody.innerHTML = '';   
+                    }
+                } else if (proveedor == "ZHONGSHAN SILK") {                                //ZHONGSHAN SILK
+                   
+                    console.log("Formato de ZHONGSHAN SILK ejecutado");
+                    let cveProveedor = 'ZSI';
+                    if (jsonData && jsonData.elements) {
+                        let numFactura = '';
+                        let numeroParte = '';
+
                         
-                        todosLosResultados.forEach((row, index) => {
-                            const tr = document.createElement('tr');
-                            const colorFracc = row.NUM_FRACC ? 'background-color: #abebc6;' : 'background-color: #f1948a;'; 
-                            const valorMercancia = valoresMercancia[index] || 'No disponible';
-
-                            tr.innerHTML = `
-                            <td>${numFactura || 'No disponible'}</td>
-                            <td>${fechaFactura}</td>
-                            <td>${textoMonto}</td>
-                            <td>${row.NUM_PART || ' '}</td>
-                            <td>${' '}</td>
-                            <td>${paisVendedor}</td>
-                            <td style="${colorFracc}">${row.NUM_FRACC || ' '}</td>
-                            <td>${row.DES_MERC}</td>
-                            <td>${moneda}</td>
-                            <td>${valoresMercancia[index]}</td>
-                            `;
-                            tbody.appendChild(tr); 
+                        const promesas = jsonData.elements.map((unElemento) => {
+                            let text = unElemento.Text || '';
+                            let path = unElemento.Path || '';
+                            
+                            //VERIFICAR UBICACION DEL NUMERO DE PARTE
+                            if(path.includes('//Document/Sect[2]/Table/TR[') && path.includes(']/TD/P')){
+                                numeroParte = text.match(/\b[A-Z0-9]{6,10}\b/); // Extrae el primer número que encuentre
+                                    
+                                if (!numeroParte) {
+                                    return Promise.resolve([]);
+                                }   
+                                console.log('No Parte: ', numeroParte);
+                                //PETICION
+                                return fetch('http://localhost:8081/data', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json'
+                                    },
+                                    body: JSON.stringify({ cveProveedor, text: numeroParte }),
+                                })
+                                .then(response => {
+                                    if (!response.ok) {
+                                        console.log(response.statusText);
+                                        throw new Error('Error en la respuesta del servidor');
+                                    }
+                                    return response.json();
+                                })
+                                .catch(error => {
+                                    console.error('Error al obtener los datos:', error);
+                                    return []; //ARREGLO VACIO SI FALLA
+                                });
+                            }
+                            // Si el path no corresponde o no hay número de parte, devuelve una promesa vacía
+                            return Promise.resolve([]);
                         });
-                        if (todosLosResultados.length === 0) {
-                            const tr = document.createElement('tr');
-                            tr.innerHTML = `<td colspan="2">No se encontraron resultados.</td>`;
-                            tbody.appendChild(tr);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error al procesar los resultados:', error);
-                    });
+
+                        Promise.all(promesas)
+                        .then(resultados => {
+                            const todosLosResultados = [].concat(...resultados);
+
+                            const tbody = document.getElementById('resultadosBody');
+
+                            tbody.innerHTML = '';   
+                            
+                            todosLosResultados.forEach((row, index) =>{
+                                const tr = document.createElement('tr');
+                                const colorPart = row.NUM_PART ? 'background-color: #abebc6;' : 'background-color: #f1948a;';
+                                const colorFracc = row.NUM_FRACC ? 'background-color: #abebc6;' : 'background-color: #f1948a;';
+
+                                tr.innerHTML = `
+                                    <td>${cveProveedor}</td>
+                                    <td>${''}</td>
+                                    <td>${''}</td>
+                                    <td>${''}</td>
+                                    <td>${''}</td>
+                                    <td>${''}</td>
+                                    <td>${''}</td>
+                                    <td>${''}</td>
+                                    <td style="${colorPart}">${row.NUM_PART}</td>
+                                    <td>${' '}</td>
+                                    <td>${''}</td>
+                                    <td style="${colorFracc}">${row.NUM_FRACC || ' '}</td>
+                                    <td>${row.DES_MERC || ''}</td>
+                                    <td>${''}</td>
+                                    <td>${''}</td>
+                                `;
+                                tbody.appendChild(tr);
+                            });
+                            
+                            // Si no se encontró en la base de datos, aplicamos color rojo
+        
+                
+                            // Si no hay resultados, muestra un mensaje
+                            if (resultados.length === 0) {
+                                const tr = document.createElement('tr');
+                                tr.innerHTML = `<td colspan="2">No se encontraron resultados.</td>`;
+                                tbody.appendChild(tr);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error al procesar los resultados:', error);
+                        });
+                    }
+                }else if(proveedor == "NINGBO DYNACO HYDRAULIC"){           //NINGBO DYNACO HYDRAULIC
+                    console.log('Formato NINGBO DYNACO HYDRAULIC')
+                    let cveProveedor = 'TON23'
+                    let totalMonto = 0.0;
+                    let valoresMercancia = [];
+                    let cantidadUMC = [];
+                    let incoterm = 'CIF'
+                    if (jsonData && jsonData.elements){
+                        let numFactura = '';
+                        let fechaFactura = '';
+                        var regexFecha = /\b\d{4}-\d{2}-\d{2}$/;
+                        let moneda = 'USD';
+                        const numerosUnicos = new Set();
+
+                        //NUMERO DE FACTURA
+                        jsonData.elements.forEach((unElemento)=>{
+                            let text = unElemento.Text;
+                            let path = unElemento.Path;
+                            if(path == '//Document/Sect[2]/P[3]/Sub'){
+                                let noFacturaSinEspacios = text.trim();
+                                let match = noFacturaSinEspacios.match(/[A-Z0-9\-]+$/);
+                                numFactura = match;
+                            }
+                        });
+                        //FECHA DE FACTURA
+                        jsonData.elements.forEach((unElemento)=>{
+                            let text = unElemento.Text;
+                            let path = unElemento.Path;
+                            if(path == '//Document/Sect[2]/P[3]/Sub[3]'){
+                                let fechaSinEspacios = text.replace(/\s+/g, '');
+                                let match = fechaSinEspacios.match(regexFecha);
+                                fechaFactura = match;
+                                console.log("Fecha de la factura: ", match);
+                            }
+                        });
+                        
+                        //fecha factura
+                        jsonData.elements.forEach((unElemento)=>{
+                            let text = unElemento.Text;
+                            let path = unElemento.Path;
+                            if(path == '//Document/Sect[2]/P[3]/Sub[3]'){
+                                let fechaSinEspacios = text.replace(/\s+/g, '');
+                                let match = fechaSinEspacios.match(regexFecha);
+                                fechaFactura = match;
+                                console.log("Fecha de la factura: ", match);
+                            }
+                        });
+
+                        
+                        //valor de la mercancia
+                        jsonData.elements.forEach((unElemento)=>{
+                            let text = unElemento.Text;
+                            let path = unElemento.Path;
+                            if(path.includes('//Document/Sect[2]/Table/TR[') && path.includes(']/TD[6]/P')){
+                                valoresMercancia.push(text);
+                            }
+                        })
+
+                        //CANTIDAD DE UMC
+                        jsonData.elements.forEach((unElemento)=>{
+                            let text = unElemento.Text;
+                            let path = unElemento.Path;
+                            if(path.includes('//Document/Sect[2]/Table/TR[') && path.includes(']/TD[4]/P')){
+                                cantidadUMC.push(text);
+                            }
+                        })
+                        //NUMERO DE PARTE
+                        const promesas = jsonData.elements.map((unElemento) => {
+                            let text = unElemento.Text || '';
+                            let path = unElemento.Path || '';
+                            
+                            //VERIFICAR UBICACION DEL NUMERO DE PARTE
+                            if(path.includes('//Document/Sect[2]/Table/TR[') && path.includes(']/TD[3]/P')){
+                                let numeroParte = text.replace(/\s+/g, ''); 
+                                    
+                                if (!numeroParte) {
+                                    return Promise.resolve([]);
+                                }   
+
+                                console.log('No Parte: ', numeroParte);
+                                //PETICION
+                                return fetch('http://localhost:8081/data', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json'
+                                    },
+                                    body: JSON.stringify({ cveProveedor, text: numeroParte }),
+                                })
+                                .then(response => {
+                                    if (!response.ok) {
+                                        console.log(response.statusText);
+                                        throw new Error('Error en la respuesta del servidor');
+                                    }
+                                    return response.json();
+                                })
+                                .catch(error => {
+                                    console.error('Error al obtener los datos:', error);
+                                    return []; //ARREGLO VACIO SI FALLA
+                                });
+                            }
+                            // Si el path no corresponde o no hay número de parte, devuelve una promesa vacía
+                            return Promise.resolve([]);
+                        });
+
+                        Promise.all(promesas)
+                        .then(resultados => {
+                            const todosLosResultados = [].concat(...resultados);
+
+                            const tbody = document.getElementById('resultadosBody');
+
+                            tbody.innerHTML = '';   
+                            
+                            todosLosResultados.forEach((row, index) =>{
+                                const tr = document.createElement('tr');
+                                const colorPart = row.NUM_PART ? 'background-color: #abebc6;' : 'background-color: #f1948a;';
+
+                                tr.innerHTML = `
+                                    <td>${cveProveedor}</td>
+                                    <td>${numFactura}</td>
+                                    <td>${fechaFactura}</td>
+                                    <td>${''}</td>
+                                    <td>${moneda}</td>
+                                    <td>${incoterm}</td>
+                                    <td>${''}</td>
+                                    <td>${''}</td>  
+                                    <td>${row.NUM_PART}</td>
+                                    <td>${' '}</td>
+                                    <td>${''}</td>
+                                    <td style="${colorPart}">${row.NUM_FRACC || ' '}</td>
+                                    <td>${row.DES_MERC || ''}</td>
+                                    <td>${valoresMercancia[index]}</td>
+                                    <td>${''}</td>
+                                    <td>${cantidadUMC[index]}</td>
+                                `;
+                                tbody.appendChild(tr);
+                            });
+                            // Si no hay resultados, muestra un mensaje
+                            if (resultados.length === 0) {
+                                const tr = document.createElement('tr');
+                                tr.innerHTML = `<td colspan="2">No se encontraron resultados.</td>`;
+                                tbody.appendChild(tr);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error al procesar los resultados:', error);
+                        });
+                    }
                 }
-            } else if (proveedor === "ZHONGSHAN SILK") { //ZHONGSHAN SILK
-                // Código para el nuevo formato de ZHONGSHAN SILK IMP. AND EXP. GROUP CO.
-                console.log("Formato de ZHONGSHAN SILK ejecutado");
-                // Implementa el nuevo formato aquí según tus necesidades
-            }
-
-        })
-        .catch(error => {
-            console.error('Error al leer el archivo JSON:', error);
+            })
+            .catch(error => {
+                console.error('Error al leer el archivo JSON:', error);
+            });
+        }
+        document.addEventListener("DOMContentLoaded", function () {
+            const fileInput = document.getElementById("fileUp-input");
+            const proveedorSelect = document.getElementById("proveedorSelect");
+    
+            // Deshabilitar el campo de carga de archivos al cargar la página
+            fileInput.disabled = true;
+    
+            // Habilitar el campo de carga cuando se selecciona un proveedor
+            proveedorSelect.addEventListener("change", function () {
+                fileInput.disabled = !proveedorSelect.value; // Solo habilita si hay un proveedor seleccionado
+            });
         });
-    </script>
-    <script>
-        function htmlExcel(idTabla, nombreArchivo = '') {
-            let linkDescarga;
-            let tipoDatos = 'application/vnd.ms-excel';
-            let tablaDatos = document.getElementById(idTabla);
-            let tablaHTML = tablaDatos.outerHTML;
-            
-            tablaHTML = tablaHTML.replace(/<th>/g, '<th style="background-color: blue; color: white; border: 1px solid rgb(255, 255, 255); height: 40px;">');
-            
-            // Aplicar formato de texto a todas las celdas
-            tablaHTML = tablaHTML.replace(/<td>([^<]*)<\/td>/g, function(match, p1) {
-              // Si la celda es un número de 8 dígitos con ceros, agregar el formato de texto
-              if (/^0{10}$/.test(p1)) {
-                  return '<td style="mso-number-format:\'\\@\';">' + p1 + '</td>';
-              } else {
-                  return '<td>' + p1 + '</td>';
-              }
-              });
-      
-            tablaHTML = tablaHTML.replace(/ /g, '%20');
-            // Nombre del archivo
-            nombreArchivo = nombreArchivo ? nombreArchivo + '.xls' : 'archivo.xlsx';
-      
-            // Crear el link de descarga
-            linkDescarga = document.createElement("a");
-      
-            document.body.appendChild(linkDescarga);
-      
-            if (navigator.msSaveOrOpenBlob) {
-              let blob = new Blob(['\ufeff', tablaHTML], {
-                type: tipoDatos
-              });
-              navigator.msSaveOrOpenBlob(blob, nombreArchivo);
-            } else {
-              // Crear el link al archivo
-              linkDescarga.href = 'data:' + tipoDatos + ', ' + tablaHTML;
-      
-              // Setear el nombre de archivo
-              linkDescarga.download = nombreArchivo;
-      
-              //Ejecutar la función
-              linkDescarga.click();
+    
+        function subir() {
+            const fileInput = document.getElementById("fileUp-input");
+            const proveedorSelect = document.getElementById("proveedorSelect");
+            const proveedor = proveedorSelect.value;
+            const file = fileInput.files[0];
+    
+            if (!proveedor) {
+                alert("Por favor, selecciona un proveedor antes de subir el archivo.");
+                return;
             }
-          }
+    
+            // Subir el archivo
+            const formData = new FormData();
+            formData.append('pdfFile', file);
+    
+            fetch('http://localhost:8081/upload', {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log("Archivo subido:", data);
+                setTimeout(() => {
+                    cargarDatosSegunProveedor(proveedor);
+                }, 30000);
+            })
+            .catch(error => {
+                console.error("Error al subir el archivo:", error);
+            });
+        }
+    </script>
 
-          function downloadExcel() {
-            htmlExcel('resultadosTable', 'Layout_Generado');
-          }
+    <script>//DESCARGAR ARCHIVO EXCEL
+        function htmlExcel(idTabla, nombreArchivo = 'archivo.xlsx') {
+            const tipoDatos = 'application/vnd.ms-excel;charset=utf-8;';
+            const tablaDatos = document.getElementById(idTabla);
+            if (!tablaDatos) {
+                alert('La tabla no existe o no tiene datos.');
+                return;
+            }
+        
+            let tablaHTML = `
+            <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+            <head><!--[if gte mso 9]><xml>
+            <x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet>
+            <x:Name>Hoja1</x:Name>
+            <x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions>
+            </x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook>
+            </xml><![endif]-->
+            <style>
+                th {
+                    background-color: green;
+                    color: white;
+                    text-align: center;
+                    border: 0px solid #ffffff;
+                    height: 20px;
+                }
+                td {
+                    border: 0px solid #000000;
+                }
+            </style>
+            </head>
+            <body><table>${tablaDatos.innerHTML}</table></body></html>`;
+        
+            const blob = new Blob([tablaHTML], { type: tipoDatos });
+        
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = nombreArchivo;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    
+        function downloadExcel() {
+            let now = new Date();
+            //Formatear la fecha y hora
+            let formattedDate = now.toISOString().slice(0, 10);
+            let formattedTime = now.toTimeString().slice(0, 8).replace(/:/g, '-');
+            let timestamp = `${formattedDate}_${formattedTime}`;
+
+            //Concatenar al nombre del archivo
+            let fileName = `layout_${timestamp}`;
+            htmlExcel('resultadosTable', fileName);
+        }
+
     </script>
     
 </body>
