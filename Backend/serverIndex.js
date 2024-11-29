@@ -46,9 +46,9 @@ const bddCredenciales = {
 };
 
 
-const numPartSet = new Set();
 //CONSULTA
 app.post('/data', (req, res) => {
+    const numPartSet = new Set();
     const { text, cveProveedor } = req.body;
 
     if(cveProveedor == 'VER106'){
@@ -98,11 +98,7 @@ app.post('/data', (req, res) => {
                 res.json([]); 
             }
             
-            /*if (result.length === 0) {
-                return res.json([{ NUM_PART: text, DES_MERC: 'No encontrad', CVE_PROV: cveProveedor, NUM_FRACC: '' }]);
             
-            }
-            res.json(result);*/
         });
     });
 });
@@ -120,7 +116,7 @@ const upload = multer({
         cb(null, `ACT_IMP.pdf`); // Nombre fijo para reemplazar el archivo existente
       }
     })
-  });
+});
   
 
   //METODO QUE SE ENCARGA DE CARGAR EL ARCHIVO PDF Y LLAMAR A TODAS LAS PETICIONES PARA PROCESARLO
