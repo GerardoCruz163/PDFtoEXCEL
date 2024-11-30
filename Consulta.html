@@ -164,7 +164,7 @@
                                 return Promise.resolve([]); //SIGUE EL FLUJO
                             }
                             //SI HAY NUMEROS DE PARTE HACE LA PETICION
-                            return fetch(`http://${ipServer}:8081/data`, {
+                            return fetch(`http://localhost:8081/data`, {
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json'
@@ -249,7 +249,7 @@
                                 }   
                                 console.log('No Parte: ', numeroParte);
                                 //PETICION
-                                return fetch(`http://${ipServer}:8081/data`, {
+                                return fetch(`http://localhost:8081/data`, {
                                     method: 'POST',
                                     headers: {
                                         'Content-Type': 'application/json'
@@ -400,7 +400,7 @@
 
                                 console.log('No Parte: ', numeroParte);
                                 //PETICION
-                                return fetch(`http://${ipServer}:8081/data`, {
+                                return fetch(`http://localhost:8081/data`, {
                                     method: 'POST',
                                     headers: {
                                         'Content-Type': 'application/json'
@@ -500,13 +500,13 @@
             const formData = new FormData();
             formData.append('pdfFile', file);
     
-            fetch(`http://localhost:8081/upload`, {
+            fetch('http://localhost:8081/upload', {
                 method: "POST",
                 body: formData
             })
             .then(response => response.json())
             .then(data => {
-                console.log("Archivo subido:", data);
+                console.log("ESTADO:", data);
                 setTimeout(() => {
                     cargarDatosSegunProveedor(proveedor);
                 }, 30000);

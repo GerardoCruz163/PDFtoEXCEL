@@ -49,6 +49,7 @@ const bddCredenciales = {
 //CONSULTA
 app.post('/data', (req, res) => {
     const numPartSet = new Set();
+    
     const { text, cveProveedor } = req.body;
 
     if(cveProveedor == 'VER106'){
