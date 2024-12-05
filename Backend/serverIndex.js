@@ -21,6 +21,7 @@ const __dirname = dirname(__filename);
 
 const app = express();
 const port = process.env.PORT || 8080;
+
 app.use(express.json());
 
 app.use(cors());
@@ -134,7 +135,7 @@ app.post('/upload', upload.single('pdfFile'), async (req, res) => {
         //OBTENCION DEL TOKEN
         try {
             tokenAcceso = await leerTokenDeArchivo();
-            console.log('Token leído del archivo: ', tokenAcceso);
+            console.log('Token leído');
             // Verificar si el token es válido haciendo una petición a preURI
             await preURI();  // Esto verificará si el token es válido
             console.log('Token válido, continuando con las demás peticiones...');
@@ -406,6 +407,7 @@ async function downloadAsset(downloadURI) {
                 return;
             }
             console.log('Archivo JSON guardado');
+            console.log('Consultando datos...')
         });
         return response.data;
     } catch (error) {

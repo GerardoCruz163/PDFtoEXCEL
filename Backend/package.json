@@ -19,5 +19,8 @@
     "node-fetch": "^3.3.2",
     "node-firebird": "^1.1.9",
     "pm2": "^5.4.2"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.15"
   }
 }

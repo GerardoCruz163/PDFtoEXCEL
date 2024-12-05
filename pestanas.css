@@ -1,50 +1,59 @@
 /* Estilo general del cuerpo */
 body {
   background: rgb(47,25,106);
-background: linear-gradient(85deg, rgba(47,25,106,1) 0%, rgba(28,38,80,1) 22%, rgba(49,200,208,1) 100%);
+background: linear-gradient(85deg, rgba(47,25,106,1) 0%, rgba(82,115,255,1) 0%, rgba(76,255,213,1) 100%);
   background-repeat: no-repeat;
   height: 3000px;
   margin: 0;
   padding: 0;
-
 }
 
 /* Encabezado */
-.encabezado {
+.divBotones {
   backdrop-filter: blur(25px);
   background-color: rgba(0, 0, 0, 0.288);
-  
   position: sticky;
   color: #ffffff;
   height: 120px;
-  width: auto;
-  left: 0%;
+  width: auto; /* Asegura que ocupe todo el ancho disponible */
+  left: 0;
   top: 0;
-  padding: 0;
+  padding: 7px; /* Añade un poco de espacio interno */
   margin: 0;
-  background-image: url('/Imagenes/AATLA_Logo_FObscuros.png');
-  background-size: 250px;
+  display: flex; /* Habilita flexbox */
+  align-items: center; /* Centra los elementos verticalmente */
+  justify-content: space-around; /* Espacia los elementos de manera uniforme */
+  /*background-image: url('/Imagenes/AATLA_Logo_FObscuros.png');*/
+  background-size: contain;
   background-repeat: no-repeat;
-  background-position: center;
+  background-position: top center;
   z-index: 10;
-  /*SOMBREADO*/
-  -webkit-box-shadow: 0px 8px 53px -15px rgba(0,0,0,0.77);
-  -moz-box-shadow: 0px 8px 53px -15px rgba(0,0,0,0.77);
-  box-shadow: 0px 8px 53px -15px rgba(0,0,0,0.77);
-  /*BORDES REDONDEADOS DE LA PARTE DE ABAJO*/
+  /* Sombra */
+  -webkit-box-shadow: 0px 8px 53px -15px rgba(0, 0, 0, 0.77);
+  -moz-box-shadow: 0px 8px 53px -15px rgba(0, 0, 0, 0.77);
+  box-shadow: 0px 8px 53px -15px rgba(0, 0, 0, 0.77);
+  /* Bordes redondeados */
   border-radius: 0px 0px 40px 40px;
-  -moz-border-radius: 0px 0px 40px 40px;
-  -webkit-border-radius: 0px 0px 40px 40px;
-  border: 0px solid #000000;
 }
-
+/* Lista de proveedores */
+.listaProveedores {
+  background-color: #ffffffc7;
+  
+  border: 1px solid #71717150;
+  backdrop-filter: blur(15px);
+  align-items: center;
+  border-radius: 10px;
+  padding: 10px 20px;
+  color: #030303;
+  font-size: 16px;
+}
 /* Sección de botones */
 .botonesDiv {
   position: sticky;
   margin: 0;
   height: 100px;
   width: auto;
-  top: 10;
+  top: 5;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -56,43 +65,46 @@ background: linear-gradient(85deg, rgba(47,25,106,1) 0%, rgba(28,38,80,1) 22%, r
   z-index: 0;
   
 }
+.contDescargar{
+  align-items: center;
+  position: sticky;
+  height: 120px;
+  width: 100%;
+  justify-content: center;
+}
 
 /* Estilo para input de archivos */
 .inputFile1 {
   backdrop-filter: 10px;
+  color: #ffffff;
 }
 
 /* Contenedor principal del contenido */
-.contenido {
+.contenedor {
   position: absolute;
-  left: 2%;
+  left: 5%;
   top: 200px;
-  width: 96%;
-  justify-content: center;
+  width: 90%; /* Ocupa el 90% del ancho de la página */
+  overflow-x: auto; /* Habilita el desplazamiento horizontal */
   margin-top: 5px;
-}
+  background: rgba(255, 255, 255, 0.8); /* Fondo semitransparente opcional */
+  border-radius: 10px;
+  padding: 10px; /* Añade espacio interno */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); /* Sombra opcional */
+} 
 
 /* Estilo para la tabla de datos */
-.resultadosTable {
-  border: 2px solid #77c5be;
-  border-radius: 20px;
+/* .resultadosTable1 {
+  border: 2px solid #77c5bf7a;
+  
+  border-radius: 15px;
   overflow-y: auto;
   overflow-x: auto;
   margin: 22px;
   z-index: 1;
-}
+  width: 50%;
+} */
 
-/* Lista de proveedores */
-.listaProveedores {
-  background-color: #ffffff1e;
-  border: 1px solid #77c5be;
-  backdrop-filter: blur(10px);
-  align-items: center;
-  border-radius: 10px;
-  padding: 10px 20px;
-  color: #ffffff;
-  font-size: 16px;
-}
 
 /* Botón de exportar a Excel */
 .btnExcel {
@@ -100,7 +112,7 @@ background: linear-gradient(85deg, rgba(47,25,106,1) 0%, rgba(28,38,80,1) 22%, r
   align-items: center;
   justify-content: center;
   padding: 10px 20px;
-  background-color: #ffffff1e;
+  background-color: #ffffff55;
   border: none;
   border: 1px;
   color: #ffffffd3;
@@ -109,16 +121,17 @@ background: linear-gradient(85deg, rgba(47,25,106,1) 0%, rgba(28,38,80,1) 22%, r
   cursor: pointer;
   border-radius: 10px;
   border-style: solid;
+  
 }
 
 .btnExcel:hover, .listaProveedores:hover {
-  background-color: #51d3c8;
+  background-color: #dedede;
   transition: 0.5s;
   /*box-shadow: -1px -1px 6px 0 rgb(122,221,102), 4px 4px 16px 2px rgb(92,162,235);*/
 }
 
 .btnExcel:active, .listaProveedores:active {
-  background-color: #ffffff1e;
+  background-color: #5c5a5a1e;
 }
 
 /* Estilo del GIF en el botón */
@@ -146,23 +159,22 @@ background: linear-gradient(85deg, rgba(47,25,106,1) 0%, rgba(28,38,80,1) 22%, r
 }
 
 /* Estilo para la tabla de datos */
-.resultadosTable {
-  width: 100px;
+.resultadosTable1 {
+  width: 200%; /* Ajusta el ancho según las columnas */
   border-collapse: collapse;
-  background-color: #ffffffb9;
+  background-color: #ffffff;
+  border-radius: 15px;
 }
 
-.resultadosTable th {
-  border: 1px solid #2ec0b4;
-  padding: 4px 15px;
-  text-align: center;
-  background-color: #2ec0b4;
-  
-  color: #ffffff;
+.resultadosTable1 th {
+  /*border: 1px solid #2ec0b4;*/
+  background-color: #2ec0b47d;
   position: sticky;
+  top: 0;
+  color: #2b2b2b;
 }
 
-.resultadosTable td {
+.resultadosTable1 td {
   border: 1px solid #8a8a8a;
   padding: 8px;
   text-align: left;
@@ -175,7 +187,7 @@ background: linear-gradient(85deg, rgba(47,25,106,1) 0%, rgba(28,38,80,1) 22%, r
   background-color: rgba(0, 0, 0, 0.427); /* Fondo oscuro para los créditos */
   backdrop-filter: blur(5px);
   color: #ffffff; /* Color del texto */
-  font-style: inherit;
+  font-style: arial;
   height: 30px; /* Mantiene una altura fija */
   width: 100%; /* Acomoda el div a lo ancho de la ventana */
   position: fixed; /* Fijo en la parte inferior de la ventana */
@@ -184,10 +196,7 @@ background: linear-gradient(85deg, rgba(47,25,106,1) 0%, rgba(28,38,80,1) 22%, r
   z-index: 10; /* Asegura que esté sobre otros elementos */
 }
 
-.creditos img {
-  height: 20px; /* Ajusta el tamaño de la imagen del logo */
-  margin-right: 10px; /* Espacio entre la imagen y el texto */
-}
+
 
 .creditos-texto {
   flex-grow: 1; /* El texto ocupa el resto del espacio */
@@ -195,3 +204,76 @@ background: linear-gradient(85deg, rgba(47,25,106,1) 0%, rgba(28,38,80,1) 22%, r
   padding-left: 10px; /* Añade algo de espacio antes del texto */
   font-size: 13px; /* Tamaño de la fuente */
 }
+
+/* Estilo del contenedor de la barra */
+.barra-contenedor {
+  position: center;
+  width: 100%; /* Ajusta el ancho total */
+  height: 20px; /* Altura de la barra */
+  background-color: #00000000; /* Color de fondo (gris claro) */
+  backdrop-filter: 20px;
+  border-radius: 10px; /* Bordes redondeados */
+  overflow: hidden; /* Oculta el contenido que se sale del contenedor */
+  position: relative;
+  margin-top: 10px;
+}
+
+/* Estilo de la barra animada */
+.barra-animada {
+  width: 30%; /* Ancho de la barra animada */
+  height: 100%;
+  background: linear-gradient(90deg, rgba(82,115,255,1), rgba(76,255,213,1)); /* Gradiente de colores */
+  border-radius: 10px; /* Bordes redondeados */
+  position: absolute;
+  animation: moverBarra 1.5s linear infinite; /* Animación en bucle */
+}
+
+/* Animación para mover la barra */
+@keyframes moverBarra {
+  0% {
+    left: -30%; /* Comienza fuera del contenedor */
+  }
+  100% {
+    left: 100%; /* Se mueve fuera del contenedor al lado derecho */
+  }
+}
+
+/* Estilo para la tarjeta del mensaje */
+.mensaje-card {
+  width: 300px; /* Ancho de la tarjeta */
+  padding: 20px; /* Espaciado interno */
+  margin: 20px auto; /* Centrado horizontal */
+  background-color: #ffffff3a; /* Fondo blanco */
+  backdrop-filter: blur(9px);
+  border-radius: 30px; /* Bordes redondeados */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Sombra sutil */
+  text-align: center; /* Alineación del texto */
+  color: #333; /* Color del texto */
+  font-size: 26px; /* Tamaño de fuente */
+  max-width: 90%; /* Ancho máximo */
+
+
+  position: fixed;
+  bottom: 20px; /* Espaciado desde el fondo */
+  left: 50%; /* Centrado horizontal */
+  transform: translateX(-50%); /* Asegura que el centro de la tarjeta esté alineado con el centro de la ventana */
+  
+  animation: aparecer 0.5s ease-out;
+}
+
+/* Estilo para el texto dentro de la tarjeta */
+.mensaje-card p {
+  margin: 0;
+}
+
+@keyframes aparecer {
+  0% {
+    opacity: 0;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+

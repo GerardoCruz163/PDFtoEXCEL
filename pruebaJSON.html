@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ELEMENTOS JSON</title>
-  <link rel="stylesheet" href="pestanas.css?v=1.0">
+  
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -38,7 +38,7 @@
         <div id="text-output"></div>
         <script>
 
-            fetch('http://localhost:8081/data') // 
+            fetch('http://localhost:8081/data') 
             .then(response => response.json())
             .then(data => {
                 const resultadosPre = document.getElementById('resultados');

@@ -4,51 +4,73 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TLA: PDF a Layout</title>
+    <link rel="stylesheet" href="pestanas.css?v=1.0">
 </head>
 <body>
-    <h1>Resultado de la Consulta</h1><img src="https://web.archive.org/web/20020607080704im_/http://elmanana.com.mx/imagenes/const3.gif" alt="">
-    <input class="inputFile1" type="file" id="fileUp-input" onchange="subir()" value="Cargar PDF">
-    <select name="Selecciona un Proveedor" class="listaProveedores" id="proveedorSelect">
-        <option value="">Selecciona un proveedor</option>
-        <option value="EDITORIAL JUVENTUD">EDITORIAL JUVENTUD S.A.</option>
-        <option value="ZHONGSHAN SILK"> ZHONGSHAN SILK IMP. AND EXP. GROUP CO.</option>
-        <option value="NINGBO DYNACO HYDRAULIC">NINGBO DYNACO HYDRAULIC CO., LTD.</option>
-    </select>
-    <button onclick="downloadExcel()">Descargar Excel</button>
+    <div id="eBotones" class="divBotones">
+       <div class = "imagenFondo"></div>
+        <select name="Selecciona un Proveedor" class="listaProveedores" id="proveedorSelect">
+            <option value="">Selecciona un proveedor</option>
+            <option value="EDITORIAL JUVENTUD">EDITORIAL JUVENTUD S.A.</option>
+            <option value="NINGBO DYNACO HYDRAULIC">NINGBO DYNACO HYDRAULIC CO., LTD.</option>
+        </select>
+        <input class="inputFile1" type="file" id="fileUp-input" onchange="subir()" value="Cargar PDF">
+        <button class="btnExcel" onclick="downloadExcel()">Descargar Excel</button>
+    </div>
+    
+    
+    <div class="barra-contenedor" id="barraContenedor" style="display: none;">
+        <div class="barra-animada" id="barraAnimada"></div>
+    </div>
 
-    <table id="resultadosTable" border="1">
-        <thead>
-            <tr>
-                <th>CLAVE PROVEEDOR</th>
-                <th>NO. FACTURA</th>
-                <th>FECHA FACTURA</th>
-                <th>MONTO FACTURA</th>
-                <th>MONEDA</th>
-                <th>INCOTERM</th>
-                <th>SUBDIVISION</th>
-                <th>CERT. ORIGEN</th>
-                <th>NO. PARTE</th>
-                <th>PAIS ORIGEN</th>
-                <th>VENDEDOR</th>
-                <th>FRACCION</th>
-                <th>DESCRIPCION</th>
-                <th>VALOR MERCANCIA</th>
-                <th>UMC</th>
-                <th>CANTIDAD DE UMC</th>
-                <th>CANTIDAD DE UMT</th>
-                <th>REFERENCIA ARANCELARIA</th>
-                <th>Marca</th>
-                <th>Submodelo</th>
-                <th>No. Serie</th>
-                <th>VALORACION</th>
-                <th>TIPO DE MERCAN</th>
-                <th>VINCULACION</th>
-            </tr>
-        </thead>
-        <tbody id="resultadosBody"></tbody>
-    </table>
+    <div class="mensaje-card" id="subiendoMsj" style="display: none;">
+        <p>Subiendo Archivo...</p>
+    </div>
+
+    <div class="mensaje-card" id="consultandoMsj" style="display: none;">
+        <p>Consultando a la base de datos...</p>
+    </div>
+
+    <div class="contenedor" >
+
+        <table id="resultadosTable" class="resultadosTable1" border="1">
+            <thead>
+                <tr>
+                    <th>CLAVE PROVEEDOR</th>
+                    <th>NO. FACTURA</th>
+                    <th>FECHA FACTURA</th>
+                    <th>MONTO FACTURA</th>
+                    <th>MONEDA</th>
+                    <th>INCOTERM</th>
+                    <th>SUBDIVISION</th>
+                    <th>CERT. ORIGEN</th>
+                    <th>NO. PARTE</th>
+                    <th>PAIS ORIGEN</th>
+                    <th>VENDEDOR</th>
+                    <th>FRACCION</th>
+                    <th>DESCRIPCION</th>
+                    <th>VALOR MERCANCIA</th>
+                    <th>UMC</th>
+                    <th>CANTIDAD DE UMC</th>
+                    <th>CANTIDAD DE UMT</th>
+                    <th>REFERENCIA ARANCELARIA</th>
+                    <th>Marca</th>
+                    <th>Submodelo</th>
+                    <th>No. Serie</th>
+                    <th>VALORACION</th>
+                    <th>TIPO DE MERCAN</th>
+                    <th>VINCULACION</th>
+                </tr>
+            </thead>
+            <tbody id="resultadosBody"></tbody>
+        </table>     
+    </div>
 
     <script>
+        //ELEMENTOS VISUALES
+        const barraContenedor = document.getElementById("barraContenedor");//BARRA DE ESPERA
+        const mensajeSubiendo = document.getElementById("subiendoMsj");
+        const mensajeConsultando = document.getElementById("consultandoMsj");
         const ipServer = "192.168.10.69";
         //AQUI SE HACE EL RECORRIDO DE CADA PROVEEDOR SEGUN EL SELECCIONADO
         function cargarDatosSegunProveedor(proveedor) {
@@ -60,6 +82,8 @@
                 return response.json();
             })
             .then(jsonData => {
+
+
                 if (proveedor == "EDITORIAL JUVENTUD") { //EDITORIAL JUVENTUD
                     let cveProveedor = 'VER106';
                     // Formato para "EDITORIAL JUVENTUD S.A."
@@ -163,6 +187,9 @@
                             if (!numerosParte) {
                                 return Promise.resolve([]); //SIGUE EL FLUJO
                             }
+
+                            barraContenedor.style.display = "block";// MUESTRO LA BARRA DE ESPERA
+                            mensajeConsultando.style.display = "block";
                             //SI HAY NUMEROS DE PARTE HACE LA PETICION
                             return fetch(`http://localhost:8081/data`, {
                                 method: 'POST',
@@ -216,6 +243,8 @@
                                 <td>${cantidadUMC[index]}</td>
                                 `;
                                 tbody.appendChild(tr);
+                                barraContenedor.style.display = "none";
+                                mensajeConsultando.style.display = "none";
                             });
                             if (todosLosResultados.length === 0) {
                                 const tr = document.createElement('tr');
@@ -306,8 +335,6 @@
                             });
                             
                             // Si no se encontró en la base de datos, aplicamos color rojo
-        
-                
                             // Si no hay resultados, muestra un mensaje
                             if (resultados.length === 0) {
                                 const tr = document.createElement('tr');
@@ -385,11 +412,13 @@
                                 cantidadUMC.push(text);
                             }
                         })
+
+                        
                         //NUMERO DE PARTE
                         const promesas = jsonData.elements.map((unElemento) => {
                             let text = unElemento.Text || '';
                             let path = unElemento.Path || '';
-                            
+
                             //VERIFICAR UBICACION DEL NUMERO DE PARTE
                             if(path.includes('//Document/Sect[2]/Table/TR[') && path.includes(']/TD[3]/P')){
                                 let numeroParte = text.replace(/\s+/g, ''); 
@@ -398,6 +427,8 @@
                                     return Promise.resolve([]);
                                 }   
 
+                                barraContenedor.style.display = "block";// MUESTRO LA BARRA DE ESPERA
+                                mensajeConsultando.style.display = "block";//mensaje indicando que se esta consultando
                                 console.log('No Parte: ', numeroParte);
                                 //PETICION
                                 return fetch(`http://localhost:8081/data`, {
@@ -413,6 +444,7 @@
                                         throw new Error('Error en la respuesta del servidor');
                                     }
                                     return response.json();
+                                    
                                 })
                                 .catch(error => {
                                     console.error('Error al obtener los datos:', error);
@@ -454,6 +486,8 @@
                                     <td>${cantidadUMC[index]}</td>
                                 `;
                                 tbody.appendChild(tr);
+                                barraContenedor.style.display = "none";
+                                mensajeConsultando.style.display = "none";
                             });
                             // Si no hay resultados, muestra un mensaje
                             if (resultados.length === 0) {
@@ -488,6 +522,8 @@
         function subir() {
             const fileInput = document.getElementById("fileUp-input");
             const proveedorSelect = document.getElementById("proveedorSelect");
+            const barraContenedor = document.getElementById("barraContenedor");
+            
             const proveedor = proveedorSelect.value;
             const file = fileInput.files[0];
     
@@ -495,7 +531,9 @@
                 alert("Por favor, selecciona un proveedor antes de subir el archivo.");
                 return;
             }
-    
+
+            barraContenedor.style.display = "block";
+            mensajeSubiendo.style.display = "block";
             // Subir el archivo
             const formData = new FormData();
             formData.append('pdfFile', file);
@@ -508,11 +546,15 @@
             .then(data => {
                 console.log("ESTADO:", data);
                 setTimeout(() => {
+                    barraContenedor.style.display = "none";
+                    mensajeSubiendo.style.display = "none";
                     cargarDatosSegunProveedor(proveedor);
                 }, 30000);
             })
             .catch(error => {
                 console.error("Error al subir el archivo:", error);
+                barraContenedor.style.display = "none";
+                mensajeSubiendo.style.display = "none";
             });
         }
     </script>
@@ -522,7 +564,7 @@
             const tipoDatos = 'application/vnd.ms-excel;charset=utf-8;';
             const tablaDatos = document.getElementById(idTabla);
             if (!tablaDatos) {
-                alert('La tabla no existe o no tiene datos.');
+                alert('La tabla no tiene datos, por favor, importa un PDF.');
                 return;
             }
         
@@ -572,6 +614,13 @@
         }
 
     </script>
+
+    
+      
+    <div class = "creditos">
+        <div class="creditos-texto">
+            © 2024 Adobe Services. Utiliza el servicio de Adobe Services. Departamento de Sistemas, Tecno Logistica Aduanal S.A de C.V, Nuevo Laredo, Tamps.
+    </div>
     
 </body>
 </html>
