@@ -4,19 +4,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TLA: PDF a Layout</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="pestanas.css?v=1.0">
+
 </head>
 <body>
-    <div id="eBotones" class="divBotones">
+
+    
+    <header id="eBotones" class="divBotones">
        <div class = "imagenFondo"></div>
+       <img src="/Imagenes/AATLA_Logo_FObscuros.png" alt="Logo" class="logo">
         <select name="Selecciona un Proveedor" class="listaProveedores" id="proveedorSelect">
             <option value="">Selecciona un proveedor</option>
             <option value="EDITORIAL JUVENTUD">EDITORIAL JUVENTUD S.A.</option>
             <option value="NINGBO DYNACO HYDRAULIC">NINGBO DYNACO HYDRAULIC CO., LTD.</option>
         </select>
         <input class="inputFile1" type="file" id="fileUp-input" onchange="subir()" value="Cargar PDF">
-        <button class="btnExcel" onclick="downloadExcel()">Descargar Excel</button>
-    </div>
+        <button class="btnExcel" onclick="downloadExcel()">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" width="32" height="32" stroke-width="2.5"> <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2"></path> <path d="M7 11l5 5l5 -5"></path> <path d="M12 4l0 12"></path> </svg> 
+            </button>
+    </header>
     
     
     <div class="barra-contenedor" id="barraContenedor" style="display: none;">
@@ -31,8 +38,7 @@
         <p>Consultando a la base de datos...</p>
     </div>
 
-    <div class="contenedor" >
-
+    <div class="contenedor" id="tablaGenerada" style="display: block;">
         <table id="resultadosTable" class="resultadosTable1" border="1">
             <thead>
                 <tr>
@@ -66,11 +72,13 @@
         </table>     
     </div>
 
+    
     <script>
         //ELEMENTOS VISUALES
         const barraContenedor = document.getElementById("barraContenedor");//BARRA DE ESPERA
         const mensajeSubiendo = document.getElementById("subiendoMsj");
         const mensajeConsultando = document.getElementById("consultandoMsj");
+        const tablaGeneradaDatos = document.getElementById("tablaGenerada");
         const ipServer = "192.168.10.69";
         //AQUI SE HACE EL RECORRIDO DE CADA PROVEEDOR SEGUN EL SELECCIONADO
         function cargarDatosSegunProveedor(proveedor) {
@@ -92,6 +100,7 @@
                         var regex = /\d+/g; //extrae numeros
                         var regexFecha = /\b(0?[1-9]|[12][0-9]|3[01])[-\/](0?[1-9]|1[012])[-\/](\d{4})\b/;
                         let numFactura = '';
+                        let incoterm= 'DAP';
                         //VARIABLES PARA EL MONTO TOTAL
                         var textoMonto = '';
                         var regexMonto = /\b\d{1,3},\d{1,2}\b/;
@@ -148,13 +157,8 @@
                             }
                         })
 
-                        let incoterm= '';
-                        jsonData.elements.forEach((unElemento)=>{
-                            let text = unElemento.Text || '';
-                            if(text.includes('CIF')){
-                                incoterm = 'CIF';
-                            }
-                        })
+                        
+                        
     
                         //PAIS VENDEDOR
                         let paisVendedor = '';
@@ -234,17 +238,26 @@
                                 <td>${''}</td>
                                 <td>${''}</td>
                                 <td>${row.NUM_PART || ' '}</td>
-                                <td>${paisVendedor}</td>
+                                <td>${''}</td>
                                 <td>${paisVendedor}</td>
                                 <td style="${colorFracc}">${row.NUM_FRACC || ' '}</td>
                                 <td>${row.DES_MERC}</td>
                                 <td>${valoresMercancia[index]}</td>
                                 <td>${''}</td>
                                 <td>${cantidadUMC[index]}</td>
+                                <td>${''}</td>
+                                <td>${''}</td>
+                                <td>${''}</td>
+                                <td>${''}</td>
+                                <td>${''}</td>
+                                <td>${row.IMP_EXPO}</td>
+                                <td>${row.EDO_MERC}</td>
+                                <td>${row.CVE_VINC}</td>
                                 `;
                                 tbody.appendChild(tr);
                                 barraContenedor.style.display = "none";
                                 mensajeConsultando.style.display = "none";
+                                tablaGeneradaDatos.style.display = "block"
                             });
                             if (todosLosResultados.length === 0) {
                                 const tr = document.createElement('tr');
@@ -484,6 +497,14 @@
                                     <td>${valoresMercancia[index]}</td>
                                     <td>${''}</td>
                                     <td>${cantidadUMC[index]}</td>
+                                    <td>${''}</td>
+                                    <td>${''}</td>
+                                    <td>${''}</td>
+                                    <td>${''}</td>
+                                    <td>${''}</td>
+                                    <td>${row.IMP_EXPO}</td>
+                                    <td>${row.EDO_MERC}</td>
+                                    <td>${row.CVE_VINC}</td>
                                 `;
                                 tbody.appendChild(tr);
                                 barraContenedor.style.display = "none";
@@ -615,11 +636,18 @@
 
     </script>
 
-    
+    <div class="container">
+        <img src="/Imagenes/PDFtoExcel.png" alt="icon" class="icon">
+        <p>IMPORTA TU FACTURA</p>
+    </div>
+      
+    <section>
+        <p></p>
+    </section>
       
     <div class = "creditos">
         <div class="creditos-texto">
-            © 2024 Adobe Services. Utiliza el servicio de Adobe Services. Departamento de Sistemas, Tecno Logistica Aduanal S.A de C.V, Nuevo Laredo, Tamps.
+            © 2024 Adobe Services. Utiliza el servicio de Adobe Services. Autor: Gerardo Cruz, Departamento de Sistemas, Tecno Logistica Aduanal S.A de C.V, Nuevo Laredo, Tamps.
     </div>
     
 </body>

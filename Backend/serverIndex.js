@@ -77,7 +77,7 @@ app.post('/data', (req, res) => {
 
         console.log("Conexion establecida a la base de datos");
         //Consulta para obtener todos los registros donde CVE_PROV sea 'VER106'
-        db.query("SELECT fpar.CVE_PROV, fpar.DES_MERC, fpar.NUM_PART, fracc.NUM_FRACC FROM CTRAC_FRACPAR fpar JOIN CTRAC_FRACC fracc ON fpar.ID_FRACC = fracc.ID_FRACC WHERE fpar.CVE_PROV = ? AND NUM_PART = ?", [cveProveedor, text], (err, result) => {
+        db.query("SELECT fpar.CVE_PROV, fpar.DES_MERC, fpar.NUM_PART, fracc.NUM_FRACC, fracc.CVE_VINC, fracc.IMP_EXPO, fracc.EDO_MERC FROM CTRAC_FRACPAR fpar JOIN CTRAC_FRACC fracc ON fpar.ID_FRACC = fracc.ID_FRACC WHERE fpar.CVE_PROV = ? AND NUM_PART = ?", [cveProveedor, text], (err, result) => {
             if (err) {
                 return res.status(500).send('Error al consultar');
             }

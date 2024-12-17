@@ -1,50 +1,83 @@
 /* Estilo general del cuerpo */
+
+:root {
+  --blanco: #ffffff;
+  --negro: #212121;
+  --primario: #334257;
+  --secundario: #476072;
+  --terciario: #548CA8;
+  --cuaternario: #EEEEEE;
+}
 body {
-  background: rgb(47,25,106);
-background: linear-gradient(85deg, rgba(47,25,106,1) 0%, rgba(82,115,255,1) 0%, rgba(76,255,213,1) 100%);
+  /* background: rgb(255,255,255);
+background: linear-gradient(85deg, rgba(255,255,255,1) 0%, rgba(29,207,165,1) 100%); */
+background-color: var(--cuaternario);
   background-repeat: no-repeat;
-  height: 3000px;
+  min-height: 100vh;
+  min-width: auto;
+  /* height: 3000px; */
   margin: 0;
   padding: 0;
+  align-items: center;
+  font-size: 16px;
+  font-family: "Montserrat";
 }
 
+header{
+  justify-content: center;
+}
 /* Encabezado */
 .divBotones {
-  backdrop-filter: blur(25px);
-  background-color: rgba(0, 0, 0, 0.288);
+  backdrop-filter: blur(10px);
+  background-color: var(--secundario);
   position: sticky;
   color: #ffffff;
-  height: 120px;
-  width: auto; /* Asegura que ocupe todo el ancho disponible */
+  
+  width: auto;
   left: 0;
   top: 0;
-  padding: 7px; /* Añade un poco de espacio interno */
+  padding: 7px;
   margin: 0;
-  display: flex; /* Habilita flexbox */
-  align-items: center; /* Centra los elementos verticalmente */
-  justify-content: space-around; /* Espacia los elementos de manera uniforme */
-  /*background-image: url('/Imagenes/AATLA_Logo_FObscuros.png');*/
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: top center;
+  display: flex; /* Flexbox para la distribución */
+  align-items: center; /* Centrado vertical */
+  flex-direction: row;
+  gap: 15px; /* Espaciado entre elementos */
   z-index: 10;
-  /* Sombra */
   -webkit-box-shadow: 0px 8px 53px -15px rgba(0, 0, 0, 0.77);
   -moz-box-shadow: 0px 8px 53px -15px rgba(0, 0, 0, 0.77);
   box-shadow: 0px 8px 53px -15px rgba(0, 0, 0, 0.77);
-  /* Bordes redondeados */
   border-radius: 0px 0px 40px 40px;
+  padding: 1rem;
+}
+.logo {
+  height: 80px; /* Ajusta el tamaño de la imagen */
+  width: auto;
+}
+.container {
+  display: flex; /* Habilita Flexbox */
+  justify-content: center; /* Centra horizontalmente */
+  align-items: center; /* Centra verticalmente */
+  height: auto; /* Altura completa de la ventana */
+  width: 100vw; /* Anchura completa de la ventana */
+  flex-direction: column;
+}
+.container p {
+  font-size: larger;
+  font-weight: 700;
+  margin-top: 0;
+}
+/* Imagen */
+.icon {
+  max-width: 100%; /* Asegura que no exceda el ancho del contenedor */
+  max-height: 100%; /* Asegura que no exceda la altura del contenedor */
 }
 /* Lista de proveedores */
 .listaProveedores {
-  background-color: #ffffffc7;
-  
-  border: 1px solid #71717150;
-  backdrop-filter: blur(15px);
+  background-color: var(--cuaternario);
   align-items: center;
   border-radius: 10px;
   padding: 10px 20px;
-  color: #030303;
+  color: var(--negro);
   font-size: 16px;
 }
 /* Sección de botones */
@@ -86,46 +119,37 @@ background: linear-gradient(85deg, rgba(47,25,106,1) 0%, rgba(82,115,255,1) 0%, 
   top: 200px;
   width: 90%; /* Ocupa el 90% del ancho de la página */
   overflow-x: auto; /* Habilita el desplazamiento horizontal */
-  margin-top: 5px;
-  background: rgba(255, 255, 255, 0.8); /* Fondo semitransparente opcional */
-  border-radius: 10px;
-  padding: 10px; /* Añade espacio interno */
+  margin-top: 0px;
+  background: rgba(255, 255, 255, 0.5); /* Fondo semitransparente opcional */
+  backdrop-filter: blur(20px);
+  border-radius: 18px;
+  padding: 0px; /* Añade espacio interno */
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); /* Sombra opcional */
 } 
 
-/* Estilo para la tabla de datos */
-/* .resultadosTable1 {
-  border: 2px solid #77c5bf7a;
-  
-  border-radius: 15px;
-  overflow-y: auto;
-  overflow-x: auto;
-  margin: 22px;
-  z-index: 1;
-  width: 50%;
-} */
 
 
-/* Botón de exportar a Excel */
+/* Botsón de exportar a Excel */
 .btnExcel {
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 10px 20px;
-  background-color: #ffffff55;
+  background-color: var(--primario);
   border: none;
-  border: 1px;
-  color: #ffffffd3;
-  font-size: 16px;
+  border: 0px;
+  color: var(--cuaternario);
+  font-size: 20px;
   margin: 4px 2px;
   cursor: pointer;
-  border-radius: 10px;
+  border-radius: 22px;
   border-style: solid;
   
 }
 
 .btnExcel:hover, .listaProveedores:hover {
-  background-color: #dedede;
+  background-color: var(--cuaternario);
+  color: var(--negro);
   transition: 0.5s;
   /*box-shadow: -1px -1px 6px 0 rgb(122,221,102), 4px 4px 16px 2px rgb(92,162,235);*/
 }
@@ -133,14 +157,6 @@ background: linear-gradient(85deg, rgba(47,25,106,1) 0%, rgba(82,115,255,1) 0%, 
 .btnExcel:active, .listaProveedores:active {
   background-color: #5c5a5a1e;
 }
-
-/* Estilo del GIF en el botón */
-.btnExcel img {
-  width: 20px;
-  height: 20px;
-  margin-right: 8px;
-}
-
 /* Botón de importar */
 .btnImportar img {
   width: 20px;
@@ -155,30 +171,43 @@ background: linear-gradient(85deg, rgba(47,25,106,1) 0%, rgba(82,115,255,1) 0%, 
 }
 
 .btnImportar:active {
-  background-color: #89ded7;
+  background-color: var(--secundario);
+  
 }
 
 /* Estilo para la tabla de datos */
 .resultadosTable1 {
   width: 200%; /* Ajusta el ancho según las columnas */
+  height: 95%;
   border-collapse: collapse;
-  background-color: #ffffff;
-  border-radius: 15px;
+  /* background-color: #ffffff23; */
+  border-radius: 20px;
+  max-height: 100vh;
 }
 
 .resultadosTable1 th {
-  /*border: 1px solid #2ec0b4;*/
-  background-color: #2ec0b47d;
+  border: 1px solid var(--terciario); 
+  background-color: var(--terciario);
+  height: 50px;
   position: sticky;
   top: 0;
-  color: #2b2b2b;
+  color: #ffffff;
+  font-family: "Montserrat";
+  font-size: small;
+  
 }
-
+.resultadosTable1 th:hover{
+  background-color: var(--secundario);
+  transition: 0.9ms;
+}
 .resultadosTable1 td {
-  border: 1px solid #8a8a8a;
+  border: 1px solid var(--terciario);
   padding: 8px;
   text-align: left;
+  font-family: Helvetica;
+  font-size: small;
 }
+
 
 .creditos {
   display: flex; /* Flexbox para alinear la imagen y el texto */
@@ -203,6 +232,7 @@ background: linear-gradient(85deg, rgba(47,25,106,1) 0%, rgba(82,115,255,1) 0%, 
   text-align: center; /* Alineación del texto */
   padding-left: 10px; /* Añade algo de espacio antes del texto */
   font-size: 13px; /* Tamaño de la fuente */
+  
 }
 
 /* Estilo del contenedor de la barra */
@@ -222,7 +252,7 @@ background: linear-gradient(85deg, rgba(47,25,106,1) 0%, rgba(82,115,255,1) 0%, 
 .barra-animada {
   width: 30%; /* Ancho de la barra animada */
   height: 100%;
-  background: linear-gradient(90deg, rgba(82,115,255,1), rgba(76,255,213,1)); /* Gradiente de colores */
+  background: linear-gradient(85deg, rgba(51,66,87,1) 0%, rgba(84,140,168,1) 100%); /* Gradiente de colores */
   border-radius: 10px; /* Bordes redondeados */
   position: absolute;
   animation: moverBarra 1.5s linear infinite; /* Animación en bucle */
