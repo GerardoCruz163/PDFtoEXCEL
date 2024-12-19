@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consulta con Verify</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="pestanas.css?v=1.0">
+</head>
+<body>
+    <header id="eBotones" class="divBotones">
+        <div class="imagenFondo"></div>
+        <img src="/Imagenes/AATLA_Logo_FObscuros.png" alt="Logo" class="logo">
+        <select name="Selecciona un Proveedor" class="listaProveedores" id="proveedorSelect">
+            <option value="">Selecciona un proveedor</option>
+            <option value="EDITORIAL JUVENTUD">EDITORIAL JUVENTUD S.A.</option>
+            <option value="NINGBO DYNACO HYDRAULIC">NINGBO DYNACO HYDRAULIC CO., LTD.</option>
+        </select>
+        <input class="inputFile1" type="file" id="fileUp-input" onchange="subir()" value="Cargar PDF">
+        <button class="btnExcel" onclick="downloadExcel()">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5">
+                <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2"></path>
+                <path d="M7 11l5 5l5 -5"></path>
+                <path d="M12 4l0 12"></path>
+            </svg>
+        </button>
+    </header>
+    
+    <div class="contenedor" id="tablaGenerada" style="display: block;">
+        <table id="resultadosTable" class="resultadosTable1" border="1">
+            <thead>
+                <tr>
+                    <th>CLAVE PROVEEDOR</th>
+                    <th>NO. FACTURA</th>
+                    <th>FECHA FACTURA</th>
+                    <th>MONTO FACTURA</th>
+                    <th>MONEDA</th>
+                    <th>INCOTERM</th>
+                    <th>SUBDIVISION</th>
+                    <th>CERT. ORIGEN</th>
+                    <th>NO. PARTE</th>
+                    <th>PAIS ORIGEN</th>
+                    <th>VENDEDOR</th>
+                    <th>FRACCION</th>
+                    <th>DESCRIPCION</th>
+                    <th>VALOR MERCANCIA</th>
+                    <th>UMC</th>
+                    <th>CANTIDAD DE UMC</th>
+                    <th>CANTIDAD DE UMT</th>
+                    <th>REFERENCIA ARANCELARIA</th>
+                    <th>Marca</th>
+                    <th>Submodelo</th>
+                    <th>No. Serie</th>
+                    <th>VALORACION</th>
+                    <th>TIPO DE MERCAN</th>
+                    <th>VINCULACION</th>
+                </tr>
+            </thead>
+            <tbody id="resultadosBody"></tbody>
+        </table>
+    </div>
+
+    <script>
+        function cargarDatosSegunProveedor(proveedor) {
+            fetch('./Backend/pruebaVerify.json')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('ERROR de Respuesta');
+                }
+                return response.json();
+            })
+            .then(jsonData => {
+                if(proveedor == "EDITORIAL JUVENTUD"){
+
+                    const tbody = document.getElementById('resultadosBody');
+                    tbody.innerHTML = ''; // Limpia la tabla antes de insertar datos
+                    let cveProveedor = 'VER16'
+                    let texto = '';
+        
+                        
+                    if (jsonData.line_items && jsonData.line_items.length > 0) {
+                        // Recorre cada elemento de line_items usando forEach
+                        jsonData.line_items.forEach(item => {
+                            const tr = document.createElement('tr');
+        
+                            //num parte
+                            texto = item.text;
+                            let numeroParte = texto.match(/\b\d{13}\b/g);
+        
+                            let valorMercancia = item.total;
+                            // Aplica estilo dinámico a las celdas con base en una condición
+                            const colorPart = item.sku ? 'background-color: #abebc6;' : 'background-color: #f1948a;';
+        
+                            tr.innerHTML = `
+                                <td>${cveProveedor}</td>
+                                <td>${''}</td>
+                                <td>${''}</td>
+                                <td>${''}</td>
+                                <td>${''}</td>
+                                <td>${''}</td>
+                                <td>${''}</td>
+                                <td>${''}</td>
+                                <td>${numeroParte}</td>
+                                <td>${''}</td>
+                                <td>${''}</td>
+                                <td>${''}</td>
+                                <td>${''}</td>
+                                <td>${valorMercancia}</td>
+                                <td>${''}</td>
+                                <td>${''}</td>
+                                <td>${''}</td>
+                                <td>${''}</td>
+                                <td>${''}</td>
+                                <td>${''}</td>
+                                <td>${''}</td>
+                                <td>${''}</td>
+                                <td>${''}</td>
+                                <td>${''}</td>
+                            `;
+                            tbody.appendChild(tr);
+                        });
+                    } else {
+                        // Muestra un mensaje si no hay resultados
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `<td colspan="24">No se encontraron resultados.</td>`;
+                        tbody.appendChild(tr);
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error al leer el archivo JSON:', error);
+            });
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const fileInput = document.getElementById("fileUp-input");
+            const proveedorSelect = document.getElementById("proveedorSelect");
+    
+            // Deshabilitar el campo de carga de archivos al cargar la página
+            fileInput.disabled = true;
+    
+            // Habilitar el campo de carga cuando se selecciona un proveedor
+            proveedorSelect.addEventListener("change", function () {
+                fileInput.disabled = !proveedorSelect.value; // Solo habilita si hay un proveedor seleccionado
+            });
+        });
+    
+        function subir() {
+            const fileInput = document.getElementById("fileUp-input");
+            const proveedorSelect = document.getElementById("proveedorSelect");
+            const barraContenedor = document.getElementById("barraContenedor");
+            
+            const proveedor = proveedorSelect.value;
+            const file = fileInput.files[0];
+    
+            if (!proveedor) {
+                alert("Por favor, selecciona un proveedor antes de subir el archivo.");
+                return;
+            }
+
+            
+            // Subir el archivo
+            const formData = new FormData();
+            formData.append('pdfFile', file);
+    
+            fetch('http://localhost:8081/upload', {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log("ESTADO:", data);
+                setTimeout(() => {
+                    barraContenedor.style.display = "none";
+                    mensajeSubiendo.style.display = "none";
+                    cargarDatosSegunProveedor(proveedor);
+                }, 30000);
+            })
+            .catch(error => {
+                console.error("Error al subir el archivo:", error);
+                barraContenedor.style.display = "none";
+                mensajeSubiendo.style.display = "none";
+            });
+        }
+    </script>
+</body>
+</html>

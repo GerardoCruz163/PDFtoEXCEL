@@ -198,7 +198,7 @@ header{
 }
 .resultadosTable1 th:hover{
   background-color: var(--secundario);
-  transition: 0.9ms;
+  transition: 0.1s;
 }
 .resultadosTable1 td {
   border: 1px solid var(--terciario);
@@ -206,6 +206,11 @@ header{
   text-align: left;
   font-family: Helvetica;
   font-size: small;
+}
+.resultadosTable1 td:hover{
+  background-color: var(--terciario);
+  color: var(--blanco);
+  transition: 0.1s;
 }
 
 
