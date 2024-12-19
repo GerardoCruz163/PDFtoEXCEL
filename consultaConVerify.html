@@ -10,12 +10,14 @@
 </head>
 <body>
     <header id="eBotones" class="divBotones">
-        <div class="imagenFondo"></div>
-        <img src="/Imagenes/AATLA_Logo_FObscuros.png" alt="Logo" class="logo">
+        <div class="imagenFondo">
+            
+        </div>
+        <img src="http://localhost:8080/pdfToExcel%20Dic/ResidenciaGera/Imagenes/AATLA_Logo_FObscuros.png" alt="Logo" class="logo">
         <select name="Selecciona un Proveedor" class="listaProveedores" id="proveedorSelect">
-            <option value="">Selecciona un proveedor</option>
-            <option value="EDITORIAL JUVENTUD">EDITORIAL JUVENTUD S.A.</option>
-            <option value="NINGBO DYNACO HYDRAULIC">NINGBO DYNACO HYDRAULIC CO., LTD.</option>
+            <option class="elemento" value="">Selecciona un proveedor</option>
+            <option class="elemento" value="EDITORIAL JUVENTUD">EDITORIAL JUVENTUD S.A.</option>
+            <option class="elemento" value="NINGBO DYNACO HYDRAULIC">NINGBO DYNACO HYDRAULIC CO., LTD.</option>
         </select>
         <input class="inputFile1" type="file" id="fileUp-input" onchange="subir()" value="Cargar PDF">
         <button class="btnExcel" onclick="downloadExcel()">
@@ -63,7 +65,7 @@
 
     <script>
         function cargarDatosSegunProveedor(proveedor) {
-            fetch('./Backend/pruebaVerify.json')
+            fetch('./Backend/ResponseJSON/PDF_EXPORT.json')
             .then(response => {
                 if (!response.ok) {
                     throw new Error('ERROR de Respuesta');
@@ -72,18 +74,80 @@
             })
             .then(jsonData => {
                 if(proveedor == "EDITORIAL JUVENTUD"){
-
+                    console.log("Formato VER16")
                     const tbody = document.getElementById('resultadosBody');
                     tbody.innerHTML = ''; // Limpia la tabla antes de insertar datos
+                    const regexFecha = /\b\d{4}-\d{2}-\d{2}\b/;
                     let cveProveedor = 'VER16'
+                    let numeroFactura = jsonData.invoice_number;
                     let texto = '';
-        
-                        
+                    let fechaNF = jsonData.date;
+                    let montoFactura = `$ ${jsonData.total}`;
+                    let moneda = jsonData.currency_code;
+                    let vendedor = 'ESP';
                     if (jsonData.line_items && jsonData.line_items.length > 0) {
                         // Recorre cada elemento de line_items usando forEach
                         jsonData.line_items.forEach(item => {
                             const tr = document.createElement('tr');
+                            let fechaFactura = fechaNF.match(regexFecha);
+                            //num parte
+                            texto = item.text;
+                            let numeroParte = texto.match(/\b\d{13,15}\b/g);
         
+                            let valorMercancia = item.total;
+
+                            let cantidadUMC = item.quantity;
+                            // Aplica estilo dinámico a las celdas con base en una condición
+                            const colorPart = item.sku ? 'background-color: #abebc6;' : 'background-color: #f1948a;';
+        
+                            tr.innerHTML = `
+                                <td>${cveProveedor}</td>
+                                <td>${numeroFactura}</td>
+                                <td>${fechaFactura}</td>
+                                <td>${montoFactura}</td>
+                                <td>${moneda}</td>
+                                <td>${''}</td>
+                                <td>${''}</td>
+                                <td>${''}</td>
+                                <td>${numeroParte}</td>
+                                <td>${''}</td>
+                                <td>${vendedor}</td>
+                                <td>${''}</td>
+                                <td>${''}</td>
+                                <td>${valorMercancia}</td>
+                                <td>${''}</td>
+                                <td>${cantidadUMC}</td>
+                                <td>${''}</td>
+                                <td>${''}</td>
+                                <td>${''}</td>
+                                <td>${''}</td>
+                                <td>${''}</td>
+                                <td>${''}</td>
+                                <td>${''}</td>
+                                <td>${''}</td>
+                            `;
+                            tbody.appendChild(tr);
+                        });
+                    } else {
+                        // Muestra un mensaje si no hay resultados
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `<td colspan="24">No se encontraron resultados.</td>`;
+                        tbody.appendChild(tr);
+                    }
+                }else if(proveedor == "NINGBO DYNACO HYDRAULIC"){
+                    console.log("Formato VER16")
+                    const tbody = document.getElementById('resultadosBody');
+                    tbody.innerHTML = ''; // Limpia la tabla antes de insertar datos
+                    const regexFecha = /\b\d{4}-\d{2}-\d{2}\b/;
+                    let cveProveedor = 'VER16'
+                    let texto = '';
+                    let fechaNF = '';
+                    
+                    if (jsonData.line_items && jsonData.line_items.length > 0) {
+                        // Recorre cada elemento de line_items usando forEach
+                        jsonData.line_items.forEach(item => {
+                            const tr = document.createElement('tr');
+                            fechaNF = item.date;
                             //num parte
                             texto = item.text;
                             let numeroParte = texto.match(/\b\d{13}\b/g);
@@ -95,7 +159,7 @@
                             tr.innerHTML = `
                                 <td>${cveProveedor}</td>
                                 <td>${''}</td>
-                                <td>${''}</td>
+                                <td>${fechaNF}</td>
                                 <td>${''}</td>
                                 <td>${''}</td>
                                 <td>${''}</td>
@@ -162,7 +226,7 @@
             
             // Subir el archivo
             const formData = new FormData();
-            formData.append('pdfFile', file);
+            formData.append('file', file);
     
             fetch('http://localhost:8081/upload', {
                 method: "POST",
@@ -172,8 +236,6 @@
             .then(data => {
                 console.log("ESTADO:", data);
                 setTimeout(() => {
-                    barraContenedor.style.display = "none";
-                    mensajeSubiendo.style.display = "none";
                     cargarDatosSegunProveedor(proveedor);
                 }, 30000);
             })
@@ -182,6 +244,61 @@
                 barraContenedor.style.display = "none";
                 mensajeSubiendo.style.display = "none";
             });
+        }
+    </script>
+
+    <script>
+        function htmlExcel(idTabla, nombreArchivo = 'archivo.xlsx') {
+            const tipoDatos = 'application/vnd.ms-excel;charset=utf-8;';
+            const tablaDatos = document.getElementById(idTabla);
+            if (!tablaDatos) {
+                alert('La tabla no tiene datos, por favor, importa un PDF.');
+                return;
+            }
+        
+            let tablaHTML = `
+            <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+            <head><!--[if gte mso 9]><xml>
+            <x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet>
+            <x:Name>Hoja1</x:Name>
+            <x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions>
+            </x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook>
+            </xml><![endif]-->
+            <style>
+                th {
+                    background-color: green;
+                    color: white;
+                    text-align: center;
+                    border: 0px solid #ffffff;
+                    height: 20px;
+                }
+                td {
+                    border: 0px solid #000000;
+                }
+            </style>
+            </head>
+            <body><table>${tablaDatos.innerHTML}</table></body></html>`;
+        
+            const blob = new Blob([tablaHTML], { type: tipoDatos });
+        
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = nombreArchivo;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    
+        function downloadExcel() {
+            let now = new Date();
+            //Formatear la fecha y hora
+            let formattedDate = now.toISOString().slice(0, 10);
+            let formattedTime = now.toTimeString().slice(0, 8).replace(/:/g, '-');
+            let timestamp = `${formattedDate}_${formattedTime}`;
+
+            //Concatenar al nombre del archivo
+            let fileName = `layout_${timestamp}`;
+            htmlExcel('resultadosTable', fileName);
         }
     </script>
 </body>

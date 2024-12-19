@@ -40,14 +40,19 @@ header{
   margin: 0;
   display: flex; /* Flexbox para la distribución */
   align-items: center; /* Centrado vertical */
-  flex-direction: row;
-  gap: 15px; /* Espaciado entre elementos */
+  flex-direction: column;
+  gap: 10px; /* Espaciado entre elementos */
   z-index: 10;
   -webkit-box-shadow: 0px 8px 53px -15px rgba(0, 0, 0, 0.77);
   -moz-box-shadow: 0px 8px 53px -15px rgba(0, 0, 0, 0.77);
   box-shadow: 0px 8px 53px -15px rgba(0, 0, 0, 0.77);
   border-radius: 0px 0px 40px 40px;
   padding: 1rem;
+}
+@media screen and (min-width: 768px) {
+  .divBotones{
+    flex-direction: row;
+  }
 }
 .logo {
   height: 80px; /* Ajusta el tamaño de la imagen */
@@ -73,12 +78,19 @@ header{
 }
 /* Lista de proveedores */
 .listaProveedores {
-  background-color: var(--cuaternario);
+  background-color: var(--primario);
   align-items: center;
-  border-radius: 10px;
-  padding: 10px 20px;
-  color: var(--negro);
+  border-radius: 22px;
+  border: solid var(--primario);
+  padding: 15px 10px;
+  color: var(--cuaternario);
   font-size: 16px;
+}
+
+.listaProveedores :hover{
+  background-color: var(--secundario);
+  color: var(--negro);
+  transition: 0.5s;
 }
 /* Sección de botones */
 .botonesDiv {
@@ -144,10 +156,10 @@ header{
   cursor: pointer;
   border-radius: 22px;
   border-style: solid;
-  
+
 }
 
-.btnExcel:hover, .listaProveedores:hover {
+.btnExcel:hover {
   background-color: var(--cuaternario);
   color: var(--negro);
   transition: 0.5s;
@@ -155,7 +167,7 @@ header{
 }
 
 .btnExcel:active, .listaProveedores:active {
-  background-color: #5c5a5a1e;
+  background-color: var(--secundario);
 }
 /* Botón de importar */
 .btnImportar img {
@@ -201,11 +213,12 @@ header{
   transition: 0.1s;
 }
 .resultadosTable1 td {
-  border: 1px solid var(--terciario);
+  border-bottom: 1px solid var(--terciario);
   padding: 8px;
   text-align: left;
   font-family: Helvetica;
   font-size: small;
+  
 }
 .resultadosTable1 td:hover{
   background-color: var(--terciario);
