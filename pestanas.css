@@ -58,6 +58,15 @@ header{
   height: 80px; /* Ajusta el tamaño de la imagen */
   width: auto;
 }
+.enlaceDiv, .enlaceDiv a{
+ 
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  color: #ffffff;
+  text-decoration: none;
+  
+}
 .container {
   display: flex; /* Habilita Flexbox */
   justify-content: center; /* Centra horizontalmente */
@@ -231,9 +240,9 @@ header{
   display: flex; /* Flexbox para alinear la imagen y el texto */
   align-items: center; /* Centra verticalmente los elementos dentro del div */
   justify-content: space-between; /* Acomoda el logo y el texto */
-  background-color: rgba(0, 0, 0, 0.427); /* Fondo oscuro para los créditos */
+  background-color: rgba(255, 255, 255, 0.427); /* Fondo oscuro para los créditos */
   backdrop-filter: blur(5px);
-  color: #ffffff; /* Color del texto */
+  color: var(--primario); /* Color del texto */
   font-style: arial;
   height: 30px; /* Mantiene una altura fija */
   width: 100%; /* Acomoda el div a lo ancho de la ventana */
@@ -241,15 +250,19 @@ header{
   bottom: 0; /* Fija el div al fondo de la página */
   padding: 0 20px; /* Espaciado interno horizontal */
   z-index: 10; /* Asegura que esté sobre otros elementos */
+  font-weight: 500;
 }
 
 
-
+.verify_logo{
+  height: 14px;
+  align-items: center;
+}
 .creditos-texto {
   flex-grow: 1; /* El texto ocupa el resto del espacio */
   text-align: center; /* Alineación del texto */
   padding-left: 10px; /* Añade algo de espacio antes del texto */
-  font-size: 13px; /* Tamaño de la fuente */
+  font-size: 15px; /* Tamaño de la fuente */
   
 }
 
