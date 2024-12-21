@@ -6,6 +6,8 @@ import multer from 'multer';
 import FormData from 'form-data';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
+import cors from 'cors';
+import firebird from 'node-firebird';
 
 const app = express();
 
@@ -13,6 +15,17 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 app.use(express.json());
+
+app.use(cors());
+const storage = multer.memoryStorage();
+const bddCredenciales = {
+  host: '192.168.10.69',
+  port: 3050,
+  database: 'C:/CASAWIN/CSAAIWIN/Datos/CASA.GDB',
+  user: 'Admin',
+  password: 'admin',
+  pageSize: 4096
+};
 
 // Asegurarse de que el directorio uploads exista
 const uploadsDir = path.join(__dirname, "uploads");
@@ -26,6 +39,61 @@ if (!fs.existsSync(jsonDir)) {
 
 // Configuración de multer para cargar archivos
 const upload = multer({ dest: uploadsDir });
+
+app.post('/data', (req, res) => {
+  const numPartSet = new Set();
+  
+  const { text, cveProveedor } = req.body;
+
+  if(cveProveedor == 'VER106'){
+      if (!/^\d+$/.test(text)) {
+          return res.status(400).send('El numero de parte no es válido');
+      }
+  }else if(cveProveedor == 'ZSI'){
+      if (!/\b[A-Z0-9]{6,10}\b/.test(text)) {
+          return res.status(400).send('El numero de parte no es válido');
+      }
+  }else if(cveProveedor == 'TON23'){
+      if (!/^\d+(-\d+)?$/.test(text) && !/^[A-Z0-9-]{6,25}$/.test(text)) {
+          return res.status(400).send('El numero de parte no es válido');
+      }
+      console.log("TON23 verificado");
+  }
+  
+  firebird.attach(bddCredenciales, (err, db) => {
+      if (err) {
+          console.log(err);
+          return res.status(500).send('No se pudo conectar a la base de datos');
+      }
+
+      console.log("Conexion establecida a la base de datos");
+      //Consulta para obtener todos los registros donde CVE_PROV sea 'VER106'
+      db.query("SELECT fpar.CVE_PROV, fpar.DES_MERC, fpar.NUM_PART, fracc.NUM_FRACC, fracc.CVE_VINC, fracc.IMP_EXPO, fracc.EDO_MERC FROM CTRAC_FRACPAR fpar JOIN CTRAC_FRACC fracc ON fpar.ID_FRACC = fracc.ID_FRACC WHERE fpar.CVE_PROV = ? AND NUM_PART = ?", [cveProveedor, text], (err, result) => {
+          if (err) {
+              return res.status(500).send('Error al consultar');
+          }
+          console.log("Resultados obtenidos:", result);
+          db.detach();
+          
+          const filteredResults = result.filter((row) => {
+              if (numPartSet.has(row.NUM_PART)) {
+                  return false;
+              } else {
+                  numPartSet.add(row.NUM_PART);
+                  return true; 
+              }
+          });
+
+           //Si hay resultados, los enviamos como JSON
+           if (filteredResults.length > 0) {
+              res.json(filteredResults); 
+          } else {
+              res.json([]); 
+          }
+          
+      });
+  });
+});
 
 // Función para cargar el archivo PDF a Veryfi
 async function uploadToVeryfi(filePath) {

@@ -29,7 +29,7 @@
         </button>
         <div class="enlaceDiv">
 
-            <a href=""><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" width="32" height="32" stroke-width="1.5"> <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"></path> <path d="M12 9h.01"></path> <path d="M11 12h1v4h1"></path> </svg> </a>
+            <a href="./info.html"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" width="32" height="32" stroke-width="1.5"> <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"></path> <path d="M12 9h.01"></path> <path d="M11 12h1v4h1"></path> </svg> </a>
         </div>
     </header>
     
@@ -77,75 +77,96 @@
                 return response.json();
             })
             .then(jsonData => {
-                if(proveedor == "EDITORIAL JUVENTUD"){
-                    console.log("Formato VER16")
+                if (proveedor === "EDITORIAL JUVENTUD") {
+                    console.log("Formato VER106");
+                    cveProveedor = 'VER106';
                     const tbody = document.getElementById('resultadosBody');
                     tbody.innerHTML = ''; // Limpia la tabla antes de insertar datos
                     const regexFecha = /\b\d{4}-\d{2}-\d{2}\b/;
-                    let cveProveedor = 'VER16'
-                    let numeroFactura = jsonData.invoice_number;
-                    let texto = '';
-                    let fechaNF = jsonData.date;
-                    let montoFactura = `$ ${jsonData.total}`;
-                    let moneda = jsonData.currency_code;
-                    let vendedor = 'ESP';
-                    if (jsonData.line_items && jsonData.line_items.length > 0) {
-                        // Recorre cada elemento de line_items usando forEach
-                        jsonData.line_items.forEach(item => {
-                            const tr = document.createElement('tr');
-                            let fechaFactura = fechaNF.match(regexFecha);
-                            //num parte
-                            texto = item.text;
-
-                            const coincidencias = texto.match(/\b\d{13,15}\b/g);
-                            let numeroParte = coincidencias ? coincidencias[coincidencias.length - 1] : 'No encontrado';;
-        
-                            let valorMercancia = item.total;
-
-                            let cantidadUMC = item.quantity;
-                            // Aplica estilo dinámico a las celdas con base en una condición
-                            const colorPart = item.sku ? 'background-color: #abebc6;' : 'background-color: #f1948a;';
-        
-                            tr.innerHTML = `
-                                <td>${cveProveedor}</td>
-                                <td>${numeroFactura}</td>
-                                <td>${fechaFactura}</td>
-                                <td>${montoFactura}</td>
-                                <td>${moneda}</td>
-                                <td>${''}</td>
-                                <td>${''}</td>
-                                <td>${''}</td>
-                                <td>${numeroParte}</td>
-                                <td>${''}</td>
-                                <td>${vendedor}</td>
-                                <td>${''}</td>
-                                <td>${''}</td>
-                                <td>${valorMercancia}</td>
-                                <td>${''}</td>
-                                <td>${cantidadUMC}</td>
-                                <td>${''}</td>
-                                <td>${''}</td>
-                                <td>${''}</td>
-                                <td>${''}</td>
-                                <td>${''}</td>
-                                <td>${''}</td>
-                                <td>${''}</td>
-                                <td>${''}</td>
-                            `;
-                            tbody.appendChild(tr);
+                    const numeroFactura = jsonData.invoice_number;
+                    const fechaFactura = jsonData.date.match(regexFecha)
+                    const totalMonto = jsonData.total
+                    const moneda = jsonData.currency_code;
+                    const valoresMercancia = jsonData.line_items.total;
+                    const cantidadUMC = jsonData.line_items.quantity;
+                    const promesas = jsonData.line_items.map((item) => {
+                        const texto = item.text || '';
+                        const coincidencias = texto.match(/\b\d{13,15}\b/g);
+                        const numerosParte = coincidencias ? coincidencias[coincidencias.length - 1] : null;
+                        
+                        if (!numerosParte) {
+                            return Promise.resolve([]); // No se encontraron números de parte
+                        }
+                
+                        return fetch(`http://localhost:8081/data`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ cveProveedor, text: numerosParte }),
+                        })
+                        .then((response) => {
+                            if (!response.ok) throw new Error('Error en la respuesta del servidor');
+                            return response.json();
+                        })
+                        .catch((error) => {
+                            console.error('Error al obtener los datos:', error);
+                            return [];
                         });
-                    } else {
-                        // Muestra un mensaje si no hay resultados
-                        const tr = document.createElement('tr');
-                        tr.innerHTML = `<td colspan="24">No se encontraron resultados.</td>`;
-                        tbody.appendChild(tr);
-                    }
+                    });
+                
+                    Promise.all(promesas)
+                        .then((resultados) => {
+                            const todosLosResultados = [].concat(...resultados);
+                
+                            todosLosResultados.forEach((row, index) => {
+                                const tr = document.createElement('tr');
+                                const colorFracc = row.NUM_FRACC ? 'background-color: #abebc6;' : 'background-color: #f1948a;';
+                
+                                tr.innerHTML = `
+                                    <td>${cveProveedor || 'No disponible'}</td>
+                                    <td>${numeroFactura || 'No disponible'}</td>
+                                    <td>${fechaFactura || 'No disponible'}</td>
+                                    <td>$ ${totalMonto || 'No disponible'}</td>
+                                    <td>${moneda || 'No disponible'}</td>
+                                    <td>${''}</td>
+                                    <td>${''}</td>
+                                    <td>${''}</td>
+                                    <td>${row.NUM_PART || 'No disponible'}</td>
+                                    <td></td>
+                                    <td>ESP</td>
+                                    <td style="${colorFracc}">${row.NUM_FRACC || ''}</td>
+                                    <td>${row.DES_MERC || 'No disponible'}</td>
+                                    <td>${valoresMercancia}</td>
+                                    <td>${''}</td>
+                                    <td>${cantidadUMC}</td>
+                                    <td>${''}</td>
+                                    <td>${''}</td>
+                                    <td>${''}</td>
+                                    <td>${''}</td>
+                                    <td>${''}</td>
+                                    <td>${''}</td>
+                                    <td>${''}</td>
+                                    <td>${''}</td>
+                                `;
+                                tbody.appendChild(tr);
+                            });
+                
+                            if (todosLosResultados.length === 0) {
+                                const tr = document.createElement('tr');
+                                tr.innerHTML = `<td colspan="24">No se encontraron resultados.</td>`;
+                                tbody.appendChild(tr);
+                            }
+                        })
+                        .catch((error) => {
+                            console.error('Error al procesar los resultados:', error);
+                        });
                 }else if(proveedor == "NINGBO DYNACO HYDRAULIC"){
                     console.log("Formato VER16")
                     const tbody = document.getElementById('resultadosBody');
                     tbody.innerHTML = ''; // Limpia la tabla antes de insertar datos
                     const regexFecha = /\b\d{4}-\d{2}-\d{2}\b/;
-                    let cveProveedor = 'VER16'
+                    let cveProveedor = 'VER106'
                     let texto = '';
                     let fechaNF = '';
                     
@@ -307,11 +328,10 @@
             htmlExcel('resultadosTable', fileName);
         }
     </script>
-
     <div class = "creditos">
         <div class="creditos-texto">
             
-            © 2024 Verify OCR. Utiliza el servicio de Verify OCR Invoices. Autor: Gerardo Cruz, Departamento de Sistemas, Tecno Logistica Aduanal S.A de C.V, Nuevo Laredo, Tamps.
+            © 2024 Verify OCR. Utiliza el servicio de Verify OCR Invoices. Desarrollo: Gerardo Cruz, Departamento de Sistemas, Tecno Logistica Aduanal S.A de C.V, Nuevo Laredo, Tamps.
     </div>
 </body>
 </html>
