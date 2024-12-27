@@ -211,6 +211,7 @@ header{
   /* background-color: #ffffff23; */
   border-radius: 20px;
   max-height: 100vh;
+  border-bottom: 50px;
 }
 
 .resultadosTable1 th {
@@ -225,12 +226,15 @@ header{
   
 }
 .resultadosTable1 th:hover{
-  background-color: var(--secundario);
+  color: #ffe6af;
   transition: 0.1s;
 }
 .resultadosTable1 td {
   border-bottom: 1px solid var(--terciario);
-  padding: 8px;
+  border-top: 0px solid var(--blanco);
+  border-left: 0px solid var(--blanco);
+  border-right: 0px solid var(--blanco);
+  padding: 5px;
   text-align: left;
   font-size: small;
   
@@ -363,4 +367,32 @@ header{
 }
 a{
   text-decoration: none;
+}
+
+.window-notice {
+  background: rgba(33, 41, 52, .85);
+  backdrop-filter: blur(10px);
+  left: 0;
+  bottom: 0;
+  right: 0;
+  top: 0;
+  display: flex;
+  position: fixed;
+  z-index: 999;
+}
+.window-notice .content {
+  background: #fff;
+  border-radius: 2px;
+  box-shadow: 0 1px 3px rgba(33, 41, 52, .75);
+  box-sizing: content-box;
+  display: flex;
+  flex-direction: column;
+  margin: auto;
+  max-width: 600px;
+  min-width: 320px !important;
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+  padding: 2rem;
+  font-size: 1.3rem;
 }

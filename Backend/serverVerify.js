@@ -88,7 +88,15 @@ app.post('/data', (req, res) => {
            if (filteredResults.length > 0) {
               res.json(filteredResults); 
           } else {
-              res.json([]); 
+              res.json([{
+                CVE_PROV: cveProveedor || 'No disponible',
+                NUM_PART: text || 'No disponible',
+                DES_MERC: 'No disponible',
+                NUM_FRACC: 'No disponible',
+                CVE_VINC: 'No disponible',
+                IMP_EXPO: 'No disponible',
+                EDO_MERC: 'No disponible'
+              }]); 
           }
           
       });
