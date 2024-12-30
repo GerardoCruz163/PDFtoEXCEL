@@ -17,7 +17,7 @@
         <img src="http://localhost:8080/pdfToExcel%20Dic/ResidenciaGera/Imagenes/AATLA_Logo_FObscuros.png" alt="Logo" class="logo">
         <select name="Selecciona un Proveedor" class="listaProveedores" id="proveedorSelect" onchange="cargarDatosSegunProveedor(this.value)">
             <option class="elemento" value="">Selecciona un proveedor</option>
-            <option class="elemento" value="EDITORIAL JUVENTUD" onclick="cargarDatosSegunProveedor()">EDITORIAL JUVENTUD S.A.</option>
+            <option class="elemento" value="EDITORIAL JUVENTUD" >EDITORIAL JUVENTUD S.A.</option>
             <option class="elemento" value="NINGBO DYNACO HYDRAULIC">NINGBO DYNACO HYDRAULIC CO., LTD.</option>
         </select>
         <input class="inputFile1" type="file" id="fileUp-input" onchange="subir()" value="Cargar PDF">
@@ -77,6 +77,10 @@
     </div> -->
 
     <script>
+        function formatPrice(number) {
+            return parseFloat(number).toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, '$1,');
+        }
+
         function cargarDatosSegunProveedor(proveedor) {
             fetch('./Backend/ResponseJSON/PDF_EXPORT.json')
             .then(response => {
@@ -94,14 +98,14 @@
                     const regexFecha = /\b\d{4}-\d{2}-\d{2}\b/;
                     const numeroFactura = jsonData.invoice_number;
                     const fechaFactura = jsonData.date.match(regexFecha)
-                    const totalMonto = jsonData.total
+                    const totalMonto = formatPrice(jsonData.total);
                     const moneda = jsonData.currency_code;
                     let valoresMercancia = [];
                     let cantidadUMC = [];
                     
                     jsonData.line_items.forEach((item)=>{
                         let cantidad = item.quantity;
-                        let valoresMerc = item.total;
+                        let valoresMerc = formatPrice(item.total);
                         cantidadUMC.push(cantidad);
                         valoresMercancia.push(valoresMerc);
                     })
@@ -179,61 +183,98 @@
                             console.error('Error al procesar los resultados:', error);
                         });
                 }else if(proveedor == "NINGBO DYNACO HYDRAULIC"){
-                    console.log("Formato VER16")
+                    console.log("Formato TON23")
                     const tbody = document.getElementById('resultadosBody');
                     tbody.innerHTML = ''; // Limpia la tabla antes de insertar datos
                     const regexFecha = /\b\d{4}-\d{2}-\d{2}\b/;
-                    let cveProveedor = 'VER106'
-                    let texto = '';
-                    let fechaNF = '';
+                    let cveProveedor = 'TON23'
+                    const numeroFactura = jsonData.invoice_number;
+                    const fechaFactura = jsonData.date.match(regexFecha);
+                    const totalMonto = formatPrice(jsonData.total);
+                    const moneda = jsonData.currency_code;
                     
-                    if (jsonData.line_items && jsonData.line_items.length > 0) {
-                        // Recorre cada elemento de line_items usando forEach
-                        jsonData.line_items.forEach(item => {
-                            const tr = document.createElement('tr');
-                            fechaNF = item.date;
-                            //num parte
-                            texto = item.text;
-                            let numeroParte = texto.match(/\b\d{13}\b/g);
-        
-                            let valorMercancia = item.total;
-                            // Aplica estilo dinámico a las celdas con base en una condición
-                            const colorPart = item.sku ? 'background-color: #abebc6;' : 'background-color: #f1948a;';
-        
-                            tr.innerHTML = `
+                    let valoresMercancia = [];
+                    let cantidadUMC = [];
+                    
+                    jsonData.line_items.forEach((item)=>{
+                        let cantidad = item.quantity;
+                        let valoresMerc = formatPrice(item.total);
+                        cantidadUMC.push(cantidad);
+                        valoresMercancia.push(valoresMerc);
+                    })
+
+                    const promesas = jsonData.line_items.map((item) => {
+                        const texto = item.text || '';
+                        // Ajuste: Extraer contenido entre el primer y segundo '\t'
+                        const regexNumeroParte = /^[^\t]*\t([^\t]+?)\t/;
+                        const coincidencia = texto.match(regexNumeroParte);
+                        const numeroParte = coincidencia ? coincidencia[1].replace(/\s+/g, '') : null;
+                        
+                        console.log(numeroParte);
+                
+                        return fetch(`http://localhost:8081/data`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ cveProveedor, text: numeroParte }),
+                        })
+                        .then((response) => {
+                            if (!response.ok) throw new Error('Error en la respuesta del servidor');
+                            return response.json();
+                        })
+                        .catch((error) => {
+                            console.error('Error al obtener los datos:', error);
+                            return [];
+                        });
+                    });
+
+                    Promise.all(promesas)
+                        .then((resultados) => {
+                            const todosLosResultados = [].concat(...resultados);
+                
+                            todosLosResultados.forEach((row, index) => {
+                                const tr = document.createElement('tr');
+                                const colorFracc = row.NUM_FRACC ? 'bsackground-color: #abebc6;' : 'background-color: #f1948a;';
+                                
+                                tr.innerHTML = `
                                 <td>${cveProveedor}</td>
-                                <td>${''}</td>
-                                <td>${fechaNF}</td>
-                                <td>${''}</td>
-                                <td>${''}</td>
-                                <td>${''}</td>
-                                <td>${''}</td>
-                                <td>${''}</td>
-                                <td>${numeroParte}</td>
+                                <td>${numeroFactura}</td>
+                                <td>${fechaFactura}</td>
+                                <td>$ ${totalMonto}</td>
+                                <td>${moneda}</td>
                                 <td>${''}</td>
                                 <td>${''}</td>
                                 <td>${''}</td>
-                                <td>${''}</td>
-                                <td>${valorMercancia}</td>
-                                <td>${''}</td>
+                                <td>${row.NUM_PART || 'No Disponible'}</td>
                                 <td>${''}</td>
                                 <td>${''}</td>
+                                <td style="${colorFracc}">${row.NUM_FRACC || 'No Disponible'}</td>
+                                <td>${row.DES_MERC || 'No Disponible'}</td>
+                                <td>$ ${valoresMercancia[index]}</td>
                                 <td>${''}</td>
+                                <td>${cantidadUMC[index]}</td>
                                 <td>${''}</td>
                                 <td>${''}</td>
                                 <td>${''}</td>
                                 <td>${''}</td>
                                 <td>${''}</td>
-                                <td>${''}</td>
+                                <td>${row.IMP_EXPO || 'No disponible'}</td>
+                                <td>${row.EDO_MERC || 'No disponible'}</td>
+                                <td>${row.CVE_VINC || 'No disponible'}</td>
                             `;
                             tbody.appendChild(tr);
+                            });
+                
+                            if (todosLosResultados.length === 0) {
+                                const tr = document.createElement('tr');
+                                tr.innerHTML = `<td colspan="24">No se encontraron resultados.</td>`;
+                                tbody.appendChild(tr);
+                            }
+                        })
+                        .catch((error) => {
+                            console.error('Error al procesar los resultados:', error);
                         });
-                    } else {
-                        // Muestra un mensaje si no hay resultados
-                        const tr = document.createElement('tr');
-                        tr.innerHTML = `<td colspan="24">No se encontraron resultados.</td>`;
-                        tbody.appendChild(tr);
-                    }
                 }
             })
             .catch(error => {
