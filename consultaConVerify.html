@@ -8,6 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="pestanas.css?v=1.0">
     <link rel="icon" href="http://localhost:8080/pdfToExcel%20Dic/ResidenciaGera/Imagenes/Imagen AATLASA.jpg">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
     <header id="eBotones" class="divBotones">
@@ -15,10 +16,11 @@
             
         </div>
         <img src="http://localhost:8080/pdfToExcel%20Dic/ResidenciaGera/Imagenes/AATLA_Logo_FObscuros.png" alt="Logo" class="logo">
-        <select name="Selecciona un Proveedor" class="listaProveedores" id="proveedorSelect" onchange="cargarDatosSegunProveedor(this.value)">
+        <select name="Selecciona un Proveedor" class="listaProveedores" id="proveedorSelect" onchange="cargarDatosSegunProveedor(this.value)"> <!--onchange="cargarDatosSegunProveedor(this.value)"-->
             <option class="elemento" value="">Selecciona un proveedor</option>
             <option class="elemento" value="EDITORIAL JUVENTUD" >EDITORIAL JUVENTUD S.A.</option>
             <option class="elemento" value="NINGBO DYNACO HYDRAULIC">NINGBO DYNACO HYDRAULIC CO., LTD.</option>
+            <option class="elemento" value="FINOTEX">FINOTEX</option>
         </select>
         <input class="inputFile1" type="file" id="fileUp-input" onchange="subir()" value="Cargar PDF">
         <button title="Descarga excel" class="btnExcel" onclick="downloadExcel()">
@@ -248,7 +250,7 @@
                                 <td>${''}</td>
                                 <td>${row.NUM_PART || 'No Disponible'}</td>
                                 <td>${''}</td>
-                                <td>${''}</td>
+                                <td>CHN</td>
                                 <td style="${colorFracc}">${row.NUM_FRACC || 'No Disponible'}</td>
                                 <td>${row.DES_MERC || 'No Disponible'}</td>
                                 <td>$ ${valoresMercancia[index]}</td>
@@ -264,6 +266,98 @@
                                 <td>${row.CVE_VINC || 'No disponible'}</td>
                             `;
                             tbody.appendChild(tr);
+                            });
+                
+                            if (todosLosResultados.length === 0) {
+                                const tr = document.createElement('tr');
+                                tr.innerHTML = `<td colspan="24">No se encontraron resultados.</td>`;
+                                tbody.appendChild(tr);
+                            }
+                        })
+                        .catch((error) => {
+                            console.error('Error al procesar los resultados:', error);
+                        });
+                }else if(proveedor == "FINOTEX"){
+                    console.log("Formato FINOTE")
+                    cveProveedor = 'FINOTE';
+                    const tbody = document.getElementById('resultadosBody');
+                    tbody.innerHTML = ''; // Limpia la tabla antes de insertar datos
+                    const regexFecha = /\b\d{4}-\d{2}-\d{2}\b/;
+                    const numeroFactura = jsonData.invoice_number;
+                    const fechaFactura = jsonData.date.match(regexFecha)
+                    const totalMonto = formatPrice(jsonData.total);
+                    const moneda = jsonData.currency_code;
+                    let valoresMercancia = [];
+                    let cantidadUMC = [];
+                    
+                    jsonData.line_items.forEach((item)=>{
+                        let cantidad = item.quantity;
+                        let valoresMerc = formatPrice(item.total);
+                        cantidadUMC.push(cantidad);
+                        valoresMercancia.push(valoresMerc);
+                    })
+                    const promesas = jsonData.line_items.map((item) => {
+                        const texto = item.text || '';
+                        const coincidencia = texto.match(/\bHS-\d{6}\b/); 
+                        const numerosParte = coincidencia ? coincidencia[0] : null; //Obtengo el primer numero que enuentre
+                        
+                        //console.log('valor mercancia ', valoresMercancia, '\numc ',cantidadUMC);
+                        /*if (!numerosParte) {
+                            return Promise.resolve([]); // No se encontraron números de parte
+                        }*/
+                
+                        return fetch(`http://localhost:8081/data`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ cveProveedor, text: numerosParte }),
+                        })
+                        .then((response) => {
+                            if (!response.ok) throw new Error('Error en la respuesta del servidor');
+                            return response.json();
+                        })
+                        .catch((error) => {
+                            console.error('Error al obtener los datos:', error);
+                            return [];
+                        });
+                    });
+                
+                    Promise.all(promesas)
+                        .then((resultados) => {
+                            const todosLosResultados = [].concat(...resultados);
+                
+                            todosLosResultados.forEach((row, index) => {
+                                const tr = document.createElement('tr');
+                                const colorFracc = row.NUM_FRACC ? 'bsackground-color: #abebc6;' : 'background-color: #f1948a;';
+                                
+                                tr.innerHTML = `
+                                    <td>${cveProveedor || 'No disponible'}</td>
+                                    <td>${numeroFactura || 'No disponible'}</td>
+                                    <td>${fechaFactura || 'No disponible'}</td>
+                                    <td>$ ${totalMonto || 'No disponible'}</td>
+                                    <td>${moneda || 'No disponible'}</td>
+                                    <td>${''}</td>
+                                    <td>${''}</td>
+                                    <td>${''}</td>
+                                    <td>${row.NUM_PART || 'No disponible'}</td>
+                                    <td></td>
+                                    <td>SLV</td>
+                                    <td style="${colorFracc}">${row.NUM_FRACC || ''}</td>
+                                    <td>${row.DES_MERC || 'No disponible'}</td>
+                                    <td>$ ${valoresMercancia[index]}</td>
+                                    <td>${''}</td>
+                                    <td>${cantidadUMC[index]}</td>
+                                    <td>${''}</td>
+                                    <td>${''}</td>
+                                    <td>${''}</td>
+                                    <td>${''}</td>
+                                    <td>${''}</td>
+                                    <td>${row.IMP_EXPO || 'No disponible'}</td>
+                                    <td>${row.EDO_MERC || 'No disponible'}</td>
+                                    <td>${row.CVE_VINC || 'No disponible'}</td>
+                                `;
+                                tbody.appendChild(tr);
                             });
                 
                             if (todosLosResultados.length === 0) {
@@ -333,64 +427,69 @@
     </script>
 
     <script>
-        function htmlExcel(idTabla, nombreArchivo = 'archivo.xlsx') {
-            const tipoDatos = 'application/vnd.ms-excel;charset=utf-8;';
-            const tablaDatos = document.getElementById(idTabla);
-            if (!tablaDatos) {
+        function htmlToExcelXLSX(idTabla, nombreArchivo = 'archivo.xlsx') {
+            const tabla = document.getElementById(idTabla);
+            if (!tabla) {
                 alert('La tabla no tiene datos, por favor, importa un PDF.');
                 return;
             }
-        
-            let tablaHTML = `
-            <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
-            <head><!--[if gte mso 9]><xml>
-            <x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet>
-            <x:Name>Hoja1</x:Name>
-            <x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions>
-            </x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook>
-            </xml><![endif]-->
-            <style>
-                th {
-                    background-color: green;
-                    color: white;
-                    text-align: center;
-                    border: 0px solid #ffffff;
-                    height: 20px;
-                }
-                td {
-                    border: 0px solid #000000;
-                    height: 20px;
-                }
-            </style>
-            </head>
-            <body><table>${tablaDatos.innerHTML}</table></body></html>`;
-        
-            const blob = new Blob([tablaHTML], { type: tipoDatos });
-        
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = nombreArchivo;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+
+            // Convierte las filas de la tabla en un arreglo de arreglos (AOA)
+            const filas = Array.from(tabla.querySelectorAll('tr')).map(fila =>
+                Array.from(fila.querySelectorAll('th, td')).map(celda => celda.innerText.trim())
+            );
+
+            // Crea el libro y la hoja de trabajo
+            const workbook = XLSX.utils.book_new();
+            const worksheet = XLSX.utils.aoa_to_sheet(filas);
+
+            // Aplica estilos a los encabezados (primera fila)
+            const encabezados = filas[0]; // Primera fila (encabezados)
+            encabezados.forEach((_, index) => {
+                const cellAddress = XLSX.utils.encode_cell({ r: 0, c: index }); // Fila 0, columna `index`
+                if (!worksheet[cellAddress]) return;
+                
+                worksheet[cellAddress].s = {
+                    font: {
+                        bold: true,
+                        color: { rgb: "4169E1" } // Color del texto blanco
+                    },
+                    fill: {
+                        patternType: "solid", // Asegura un color de fondo sólido
+                        fgColor: { rgb: "4CAF50" } // Color de fondo verde
+                    },
+                    alignment: {
+                        horizontal: "center", // Centrado horizontal
+                        vertical: "center" // Centrado vertical
+                    },
+                    border: {
+                        top: { style: "thin", color: { rgb: "000000" } },
+                        bottom: { style: "thin", color: { rgb: "000000" } },
+                        left: { style: "thin", color: { rgb: "000000" } },
+                        right: { style: "thin", color: { rgb: "000000" } },
+                    }
+                };
+            });
+
+            // Agrega la hoja al libro y descarga
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Layout de Factura");
+            XLSX.writeFile(workbook, nombreArchivo);
         }
-    
+
         function downloadExcel() {
             let now = new Date();
-            //Formatear la fecha y hora
             let formattedDate = now.toISOString().slice(0, 10);
             let formattedTime = now.toTimeString().slice(0, 8).replace(/:/g, '-');
             let timestamp = `${formattedDate}_${formattedTime}`;
-
-            //Concatenar al nombre del archivo
-            let fileName = `layout_${timestamp}`;
-            htmlExcel('resultadosTable', fileName);
+            let fileName = `layout_${timestamp}.xlsx`;
+            htmlToExcelXLSX('resultadosTable', fileName);
         }
+        
     </script>
     <div class = "creditos">
         <div class="creditos-texto">
             
-            © 2024 Verify OCR. Utiliza el servicio de Verify OCR Invoices. Departamento de Sistemas, Tecno Logistica Aduanal S.A de C.V, Nuevo Laredo, Tamps.
+            © 2025 Verify OCR. Utiliza el servicio de Verify OCR Invoices. Departamento de Sistemas, Tecno Logistica Aduanal S.A de C.V, Nuevo Laredo, Tamps.
     </div>
 </body>
 </html>
