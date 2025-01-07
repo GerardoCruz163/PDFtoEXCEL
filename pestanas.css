@@ -309,7 +309,9 @@ header{
     left: 100%; /* Se mueve fuera del contenedor al lado derecho */
   }
 }
-
+.gif_cargando{
+  height: 50px;
+}
 /* Estilo para la tarjeta del mensaje */
 .mensaje-card {
   width: 300px; /* Ancho de la tarjeta */
@@ -317,14 +319,16 @@ header{
   margin: 20px auto; /* Centrado horizontal */
   background-color: #ffffff3a; /* Fondo blanco */
   backdrop-filter: blur(9px);
-  border-radius: 30px; /* Bordes redondeados */
+  border-radius: 70px; /* Bordes redondeados */
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Sombra sutil */
   text-align: center; /* Alineación del texto */
   color: #333; /* Color del texto */
   font-size: 26px; /* Tamaño de fuente */
   max-width: 90%; /* Ancho máximo */
 
-
+  display: flex;
+  justify-content: space-evenly;
+  
   position: fixed;
   bottom: 20px; /* Espaciado desde el fondo */
   left: 50%; /* Centrado horizontal */
@@ -370,9 +374,13 @@ a{
   text-decoration: none;
 }
 
+.hidden {
+  display: none;
+}
+
 .window-notice {
-  background: rgba(33, 41, 52, .85);
-  backdrop-filter: blur(10px);
+  /* background: rgba(33, 41, 52, .85); */
+  /* backdrop-filter: blur(10px); */
   left: 0;
   bottom: 0;
   right: 0;
@@ -382,8 +390,9 @@ a{
   z-index: 999;
 }
 .window-notice .content {
-  background: #fff;
-  border-radius: 2px;
+  background: #ffffff86;
+  backdrop-filter: blur(20px);
+  border-radius: 30px;
   box-shadow: 0 1px 3px rgba(33, 41, 52, .75);
   box-sizing: content-box;
   display: flex;
@@ -406,10 +415,12 @@ a{
   
 }
 .nota{
-  
   background-color: #548ca8a1;
-  border-radius: 20px;
+  border-radius: 30px;
   color: rgb(255, 255, 255);
+  width: 70%;
+
+
 }
 
 .nota > h1, .nota > p{

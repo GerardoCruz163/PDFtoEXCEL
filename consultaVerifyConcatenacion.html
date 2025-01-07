@@ -37,7 +37,7 @@
         </div>
     </header>
     
-    <div class="mensaje-card" id="subiendoMsj" style="display: none;">
+    <div class="mensaje-card" id="subiendoMsj" style="display: block;">
         <img class="gif_cargando" src="https://cdn.pixabay.com/animation/2022/07/29/03/42/03-42-05-37_512.gif" alt="">
         <p>Subiendo archivo...</p>
     </div>
@@ -93,6 +93,7 @@
     </div> -->
 
     <script>
+
         const mensajeSubiendo = document.getElementById("subiendoMsj");
         const mensajeConsultando = document.getElementById("consultandoMsj");
         function formatPrice(number) {
@@ -136,6 +137,7 @@
                         /*if (!numerosParte) {
                             return Promise.resolve([]); // No se encontraron números de parte
                         }*/
+                
                         mensajeConsultando.style.display = "block";
                         return fetch(`http://localhost:8081/data`, {
                             method: 'POST',
@@ -230,7 +232,7 @@
                         const numeroParte = coincidencia ? coincidencia[1].replace(/\s+/g, '') : null;
                         
                         console.log(numeroParte);
-                        mensajeConsultando.style.display = "block";
+                
                         return fetch(`http://localhost:8081/data`, {
                             method: 'POST',
                             headers: {
@@ -283,7 +285,6 @@
                                 <td>${row.CVE_VINC || 'ND'}</td>
                             `;
                             tbody.appendChild(tr);
-                            mensajeConsultando.style.display = "none";
                             });
                 
                             if (todosLosResultados.length === 0) {
@@ -323,7 +324,7 @@
                         /*if (!numerosParte) {
                             return Promise.resolve([]); // No se encontraron números de parte
                         }*/
-                        mensajeConsultando.style.display = "block";
+                
                         return fetch(`http://localhost:8081/data`, {
                             method: 'POST',
                             headers: {
@@ -376,7 +377,6 @@
                                     <td>${row.CVE_VINC || 'ND'}</td>
                                 `;
                                 tbody.appendChild(tr);
-                                mensajeConsultando.style.display = "none";
                             });
                 
                             if (todosLosResultados.length === 0) {
@@ -408,7 +408,7 @@
                         valoresMercancia.push(valoresMerc);
                     })
                     const promesas = jsonData.line_items.map((item) => {
-                        const texto = item.description || '';
+                        const texto = item.text || '';
                         const coincidencia = texto.match(/\b(?:HT|JK|ST)-\d{6}\b/); 
                         const numerosParte = coincidencia ? coincidencia[0] : null; //Obtengo el primer numero que enuentre
                         
@@ -416,7 +416,7 @@
                         /*if (!numerosParte) {
                             return Promise.resolve([]); // No se encontraron números de parte
                         }*/
-                        mensajeConsultando.style.display = "block";
+                
                         return fetch(`http://localhost:8081/data`, {
                             method: 'POST',
                             headers: {
@@ -469,7 +469,6 @@
                                     <td>${row.CVE_VINC || 'ND'}</td>
                                 `;
                                 tbody.appendChild(tr);
-                                mensajeConsultando.style.display = "none";
                             });
                 
                             if (todosLosResultados.length === 0) {
@@ -527,6 +526,7 @@
             .then(data => {
                 console.log("ESTADO:", data);
                 setTimeout(() => {
+                    mensajeSubiendo.style.display = "none";
                     cargarDatosSegunProveedor(proveedor);
                 }, 30000);
             })
