@@ -68,7 +68,8 @@ app.post('/data', (req, res) => {
 
       console.log("Conexion establecida a la base de datos");
       //Consulta para obtener todos los registros donde CVE_PROV sea 'VER106'
-      db.query("SELECT fpar.CVE_PROV, fpar.DES_MERC, fpar.NUM_PART, fracc.NUM_FRACC, fracc.CVE_VINC, fracc.IMP_EXPO, fracc.EDO_MERC FROM CTRAC_FRACPAR fpar JOIN CTRAC_FRACC fracc ON fpar.ID_FRACC = fracc.ID_FRACC WHERE fpar.CVE_PROV = ? AND NUM_PART = ?", [cveProveedor, text], (err, result) => {
+      if(cveProveedor == 'NLD-86'){
+        db.query("SELECT cc.CVE_PROV, cf.NUM_PART, cf.DES_MERC, cf.FRACCION, cf.CVE_VINC FROM CBOO_COBO cc JOIN CBOO_FACPAR cf ON cf.NUM_COBO = cc.NUM_COBO WHERE cc.CVE_PROV = ? AND cf.NUM_PART = ?", [cveProveedor, text], (err, result) => {
           if (err) {
               return res.status(500).send('Error al consultar');
           }
@@ -92,14 +93,47 @@ app.post('/data', (req, res) => {
                 CVE_PROV: cveProveedor || 'No disponible',
                 NUM_PART: text || 'No disponible',
                 DES_MERC: 'No disponible',
-                NUM_FRACC: 'No disponible',
-                CVE_VINC: 'No disponible',
-                IMP_EXPO: 'No disponible',
-                EDO_MERC: 'No disponible'
+                FRACCION: 'No disponible',
+                CVE_VINC: 'No disponible'
               }]); 
           }
           
       });
+      }else{
+        db.query("SELECT fpar.CVE_PROV, fpar.DES_MERC, fpar.NUM_PART, fracc.NUM_FRACC, fracc.CVE_VINC, fracc.IMP_EXPO, fracc.EDO_MERC FROM CTRAC_FRACPAR fpar JOIN CTRAC_FRACC fracc ON fpar.ID_FRACC = fracc.ID_FRACC WHERE fpar.CVE_PROV = ? AND NUM_PART = ?", [cveProveedor, text], (err, result) => {
+            if (err) {
+                return res.status(500).send('Error al consultar');
+            }
+            console.log("Resultados obtenidos:", result);
+            db.detach();
+            
+            const filteredResults = result.filter((row) => {
+                if (numPartSet.has(row.NUM_PART)) {
+                    return false;
+                } else {
+                    numPartSet.add(row.NUM_PART);
+                    return true; 
+                }
+            });
+  
+             //Si hay resultados, los enviamos como JSON
+             if (filteredResults.length > 0) {
+                res.json(filteredResults); 
+            } else {
+                res.json([{
+                  CVE_PROV: cveProveedor || 'No disponible',
+                  NUM_PART: text || 'No disponible',
+                  DES_MERC: 'No disponible',
+                  NUM_FRACC: 'No disponible',
+                  CVE_VINC: 'No disponible',
+                  IMP_EXPO: 'No disponible',
+                  EDO_MERC: 'No disponible'
+                }]); 
+            }
+            
+        });
+
+      }
   });
 });
 

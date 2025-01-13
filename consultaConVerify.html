@@ -16,12 +16,15 @@
             
         </div>
         <img src="http://localhost:8080/pdfToExcel%20Dic/ResidenciaGera/Imagenes/AATLA_Logo_FObscuros.png" alt="Logo" class="logo">
-        <select name="Selecciona un Proveedor" class="listaProveedores" id="proveedorSelect"> <!--onchange="cargarDatosSegunProveedor(this.value)"-->
+        <select name="Selecciona un Proveedor" class="listaProveedores" id="proveedorSelect" onchange="cargarDatosSegunProveedor(this.value)"> <!--onchange="cargarDatosSegunProveedor(this.value)"-->
             <option class="elemento" value="">Selecciona un proveedor</option>
             <option class="elemento" value="EDITORIAL JUVENTUD" >EDITORIAL JUVENTUD S.A.</option>
             <option class="elemento" value="NINGBO DYNACO HYDRAULIC">NINGBO DYNACO HYDRAULIC CO., LTD.</option>
             <option class="elemento" value="FINOTEX">FINOTEX</option>
             <option class="elemento" value="TRAY">TRAY</option>
+            <option class="elemento" value="HITACHI">HITACHI Reliable Solutions</option>
+            <option class="elemento" value="WENZHOU">WENZHOU MODERN WESHARE INTERNATIONAL BUSINESS CO., LTD</option>
+            <option class="elemento" value="MANSONS">MANSONS Driving change</option>
         </select>
         <input class="inputFile1" type="file" id="fileUp-input" onchange="subir()" value="Cargar PDF">
         <button title="Descarga excel" class="btnExcel" onclick="downloadExcel()">
@@ -33,7 +36,7 @@
         </button>
         <div class="enlaceDiv">
 
-            <a title="Informacion" href="./info.html"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" width="32" height="32" stroke-width="1.5"> <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"></path> <path d="M12 9h.01"></path> <path d="M11 12h1v4h1"></path> </svg> </a>
+            <a class="infoEnlace" title="Informacion" href="./info.html"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" width="32" height="32" stroke-width="1.5"> <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"></path> <path d="M12 9h.01"></path> <path d="M11 12h1v4h1"></path> </svg> </a>
         </div>
     </header>
     
@@ -46,7 +49,20 @@
         <p>Consultando a la base de datos, ya casi esta...</p>
     </div>
 
-    <div class="contenedor" id="tablaGenerada" style="display: block;">
+    <div class="iconosPDFExcel" id="iconosInicio">
+        <h1>Convierte una factura.pdf a layout_factura.xlsx</h1>
+        <div>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" width="48" height="48" stroke-width="1.5"> <path d="M14 3v4a1 1 0 0 0 1 1h4"></path> <path d="M5 12v-7a2 2 0 0 1 2 -2h7l5 5v4"></path> <path d="M5 18h1.5a1.5 1.5 0 0 0 0 -3h-1.5v6"></path> <path d="M17 18h2"></path> <path d="M20 15h-3v6"></path> <path d="M11 15v6h1a2 2 0 0 0 2 -2v-2a2 2 0 0 0 -2 -2h-1z"></path> </svg> 
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" width="48" height="48" stroke-width="1.5">
+                <path d="M5 12l14 0"></path>
+                <path d="M15 16l4 -4"></path>
+                <path d="M15 8l4 4"></path>
+              </svg>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" width="48" height="48" stroke-width="1.5"> <path d="M14 3v4a1 1 0 0 0 1 1h4"></path> <path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2"></path> <path d="M10 12l4 5"></path> <path d="M10 17l4 -5"></path> </svg> 
+
+        </div>
+    </div>
+    <div class="contenedor" id="tablaGenerada" style="display: none;">
         <table id="resultadosTable" class="resultadosTable1" border="1">
             <thead>
                 <tr>
@@ -93,6 +109,8 @@
     </div> -->
 
     <script>
+        const iconos = document.getElementById("iconosInicio");
+        const tablaGenerada = document.getElementById("tablaGenerada");
         const mensajeSubiendo = document.getElementById("subiendoMsj");
         const mensajeConsultando = document.getElementById("consultandoMsj");
         function formatPrice(number) {
@@ -120,6 +138,10 @@
                     const moneda = jsonData.currency_code;
                     let valoresMercancia = [];
                     let cantidadUMC = [];
+                    /*jsonData.vendor.map((item)=>{
+                        let vendedor = item.name;
+                        console.log(vendedor);
+                    })*/
                     
                     jsonData.line_items.forEach((item)=>{
                         let cantidad = item.quantity;
@@ -189,7 +211,18 @@
                                     <td>${row.CVE_VINC || 'ND'}</td>
                                 `;
                                 tbody.appendChild(tr);
+                                
+                                const cells = tr.querySelectorAll('td');
+                            cells.forEach((cell) => {
+                                if (cell.textContent.trim() === 'No disponible') {
+                                    cell.style.backgroundColor = '#f8d7da'; // Color rojo claro
+                                    cell.style.color = '#721c24'; // Texto en rojo oscuro
+                                }
+                            });
+
+                                tablaGenerada.style.display = "block";
                                 mensajeConsultando.style.display = "none";
+                                iconos.style.display="none";
                             });
                 
                             if (todosLosResultados.length === 0) {
@@ -283,7 +316,18 @@
                                 <td>${row.CVE_VINC || 'ND'}</td>
                             `;
                             tbody.appendChild(tr);
+
+                            const cells = tr.querySelectorAll('td');
+                            cells.forEach((cell) => {
+                                if (cell.textContent.trim() === 'No disponible') {
+                                    cell.style.backgroundColor = '#f8d7da'; // Color rojo claro
+                                    cell.style.color = '#721c24'; // Texto en rojo oscuro
+                                }
+                            });
+
+                            tablaGenerada.style.display = "block";
                             mensajeConsultando.style.display = "none";
+                            iconos.style.display="none";
                             });
                 
                             if (todosLosResultados.length === 0) {
@@ -376,7 +420,18 @@
                                     <td>${row.CVE_VINC || 'ND'}</td>
                                 `;
                                 tbody.appendChild(tr);
+
+                                const cells = tr.querySelectorAll('td');
+                                cells.forEach((cell) => {
+                                    if (cell.textContent.trim() === 'No disponible') {
+                                        cell.style.backgroundColor = '#f8d7da'; // Color rojo claro
+                                        cell.style.color = '#721c24'; // Texto en rojo oscuro
+                                    }
+                                });
+
+                                tablaGenerada.style.display = "block";
                                 mensajeConsultando.style.display = "none";
+                                iconos.style.display="none";
                             });
                 
                             if (todosLosResultados.length === 0) {
@@ -469,7 +524,326 @@
                                     <td>${row.CVE_VINC || 'ND'}</td>
                                 `;
                                 tbody.appendChild(tr);
+
+                                const cells = tr.querySelectorAll('td');
+                                cells.forEach((cell) => {
+                                    if (cell.textContent.trim() === 'No disponible') {
+                                        cell.style.backgroundColor = '#f8d7da'; // Color rojo claro
+                                        cell.style.color = '#721c24'; // Texto en rojo oscuro
+                                    }
+                                });
+
+                                tablaGenerada.style.display = "block";
                                 mensajeConsultando.style.display = "none";
+                                iconos.style.display="none";
+                            });
+                
+                            if (todosLosResultados.length === 0) {
+                                const tr = document.createElement('tr');
+                                tr.innerHTML = `<td colspan="24">No se encontraron resultados.</td>`;
+                                tbody.appendChild(tr);
+                            }
+                        })
+                        .catch((error) => {
+                            console.error('Error al procesar los resultados:', error);
+                        });
+                }else if(proveedor == "HITACHI"){
+                    console.log("Formato HITACHI")
+                    cveProveedor = 'NLD-86';
+                    const tbody = document.getElementById('resultadosBody');
+                    tbody.innerHTML = ''; // Limpia la tabla antes de insertar datos
+                    const regexFecha = /\b\d{4}-\d{2}-\d{2}\b/;
+                    const numeroFactura = jsonData.invoice_number;
+                    const fechaFactura = jsonData.date.match(regexFecha)
+                    const totalMonto = formatPrice(jsonData.total);
+                    const moneda = jsonData.currency_code;
+                    let valoresMercancia = [];
+                    let cantidadUMC = [];
+                    
+                    jsonData.line_items.forEach((item)=>{
+                        let cantidad = item.quantity;
+                        let valoresMerc = formatPrice(item.total);
+                        cantidadUMC.push(cantidad);
+                        valoresMercancia.push(valoresMerc);
+                    })
+                    const promesas = jsonData.line_items.map((item) => {
+                        const texto = item.description || '';
+                        const coincidencia = texto.match(/\b(?:HT|JK|ST)-\d{6}\b/); 
+                        //const numerosParte = coincidencia ? coincidencia[0] : null; //Obtengo el primer numero que enuentre
+                        const numerosParte = item.sku;
+                        //console.log('valor mercancia ', valoresMercancia, '\numc ',cantidadUMC);
+                        /*if (!numerosParte) {
+                            return Promise.resolve([]); // No se encontraron números de parte
+                        }*/
+                        mensajeConsultando.style.display = "block";
+                        return fetch(`http://localhost:8081/data`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ cveProveedor, text: numerosParte }),
+                        })
+                        .then((response) => {
+                            if (!response.ok) throw new Error('Error en la respuesta del servidor');
+                            return response.json();
+                        })
+                        .catch((error) => {
+                            console.error('Error al obtener los datos:', error);
+                            return [];
+                        });
+                    });
+                    Promise.all(promesas)
+                        .then((resultados) => {
+                            const todosLosResultados = [].concat(...resultados);
+                
+                            todosLosResultados.forEach((row, index) => {
+                                const tr = document.createElement('tr');
+                                const colorFracc = row.NUM_FRACC ? 'bsackground-color: #abebc6;' : 'background-color: #f1948a;';
+                                
+                                tr.innerHTML = `
+                                    <td>${cveProveedor || 'ND'}</td>
+                                    <td>${numeroFactura || 'ND'}</td>
+                                    <td>${fechaFactura || 'ND'}</td>
+                                    <td>$ ${totalMonto || 'ND'}</td>
+                                    <td>${moneda || 'ND'}</td>
+                                    <td>${''}</td>
+                                    <td>${''}</td>
+                                    <td>${''}</td>
+                                    <td>${row.NUM_PART || 'ND'}</td>
+                                    <td></td>
+                                    <td>USA</td>
+                                    <td style="${colorFracc}">${row.NUM_FRACC || ''}</td>
+                                    <td>${row.DES_MERC || 'ND'}</td>
+                                    <td>$ ${valoresMercancia[index]}</td>
+                                    <td>${''}</td>
+                                    <td>${cantidadUMC[index]}</td>
+                                    <td>${''}</td>
+                                    <td>${''}</td>
+                                    <td>${''}</td>
+                                    <td>${''}</td>
+                                    <td>${''}</td>
+                                    <td>${row.IMP_EXPO || 'ND'}</td>
+                                    <td>${row.EDO_MERC || 'ND'}</td>
+                                    <td>${row.CVE_VINC || 'ND'}</td>
+                                `;
+                                tbody.appendChild(tr);
+
+                                const cells = tr.querySelectorAll('td');
+                                cells.forEach((cell) => {
+                                    if (cell.textContent.trim() === 'No disponible') {
+                                        cell.style.backgroundColor = '#f8d7da'; // Color rojo claro
+                                        cell.style.color = '#721c24'; // Texto en rojo oscuro
+                                    }
+                                });
+
+                                tablaGenerada.style.display = "block";
+                                mensajeConsultando.style.display = "none";
+                                iconos.style.display="none";
+                            });
+                
+                            if (todosLosResultados.length === 0) {
+                                const tr = document.createElement('tr');
+                                tr.innerHTML = `<td colspan="24">No se encontraron resultados.</td>`;
+                                tbody.appendChild(tr);
+                            }
+                        })
+                        .catch((error) => {
+                            console.error('Error al procesar los resultados:', error);
+                        });
+                }else if(proveedor=='WENZHOU'){
+                    console.log("Formato HITACHI")
+                    cveProveedor = 'NLD-86';
+                    const tbody = document.getElementById('resultadosBody');
+                    tbody.innerHTML = ''; // Limpia la tabla antes de insertar datos
+                    const regexFecha = /\b\d{4}-\d{2}-\d{2}\b/;
+                    const numeroFactura = jsonData.invoice_number;
+                    const fechaFactura = jsonData.date.match(regexFecha)
+                    const totalMonto = formatPrice(jsonData.total);
+                    const moneda = jsonData.currency_code;
+                    let valoresMercancia = [];
+                    let cantidadUMC = [];
+                    
+                    jsonData.line_items.forEach((item)=>{
+                        let cantidad = item.quantity;
+                        let valoresMerc = formatPrice(item.total);
+                        cantidadUMC.push(cantidad);
+                        valoresMercancia.push(valoresMerc);
+                    })
+                    const promesas = jsonData.line_items.map((item) => {
+                        const texto = item.description || '';
+                        const coincidencia = texto.match(/\b[a-zA-Z0-9]+(?:\s[a-zA-Z0-9]+)*\b/g); 
+                        const numerosParte = coincidencia ? coincidencia[0] : null; //Obtengo el primer numero que enuentre
+                        
+                        //console.log('valor mercancia ', valoresMercancia, '\numc ',cantidadUMC);
+                        /*if (!numerosParte) {
+                            return Promise.resolve([]); // No se encontraron números de parte
+                        }*/
+                        mensajeConsultando.style.display = "block";
+                        return fetch(`http://localhost:8081/data`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ cveProveedor, text: numerosParte }),
+                        })
+                        .then((response) => {
+                            if (!response.ok) throw new Error('Error en la respuesta del servidor');
+                            return response.json();
+                        })
+                        .catch((error) => {
+                            console.error('Error al obtener los datos:', error);
+                            return [];
+                        });
+                    });
+                    Promise.all(promesas)
+                        .then((resultados) => {
+                            const todosLosResultados = [].concat(...resultados);
+                
+                            todosLosResultados.forEach((row, index) => {
+                                const tr = document.createElement('tr');
+                                const colorFracc = row.FRACCION ? 'bsackground-color: #abebc6;' : 'background-color: #f1948a;';
+                                
+                                tr.innerHTML = `
+                                    <td>${cveProveedor || 'ND'}</td>
+                                    <td>${numeroFactura || 'ND'}</td>
+                                    <td>${fechaFactura || 'ND'}</td>
+                                    <td>$ ${totalMonto || 'ND'}</td>
+                                    <td>${moneda || 'ND'}</td>
+                                    <td>${''}</td>
+                                    <td>${''}</td>
+                                    <td>${''}</td>
+                                    <td>${row.NUM_PART || 'ND'}</td>
+                                    <td></td>
+                                    <td>${''}</td>
+                                    <td style="${colorFracc}">${row.FRACCION || ''}</td>
+                                    <td>${row.DES_MERC || 'ND'}</td>
+                                    <td>$ ${valoresMercancia[index]}</td>
+                                    <td>${''}</td>
+                                    <td>${cantidadUMC[index]}</td>
+                                    <td>${''}</td>
+                                    <td>${''}</td>
+                                    <td>${''}</td>
+                                    <td>${''}</td>
+                                    <td>${''}</td>
+                                    <td>${row.IMP_EXPO || 'ND'}</td>
+                                    <td>${row.EDO_MERC || 'ND'}</td>
+                                    <td>${row.CVE_VINC || 'ND'}</td>
+                                `;
+                                tbody.appendChild(tr);
+
+                                const cells = tr.querySelectorAll('td');
+                                cells.forEach((cell) => {
+                                    if (cell.textContent.trim() === 'No disponible') {
+                                        cell.style.backgroundColor = '#f8d7da'; // Color rojo claro
+                                        cell.style.color = '#721c24'; // Texto en rojo oscuro
+                                    }
+                                });
+
+                                tablaGenerada.style.display = "block";
+                                mensajeConsultando.style.display = "none";
+                                iconos.style.display="none";
+                            });
+                
+                            if (todosLosResultados.length === 0) {
+                                const tr = document.createElement('tr');
+                                tr.innerHTML = `<td colspan="24">No se encontraron resultados.</td>`;
+                                tbody.appendChild(tr);
+                            }
+                        })
+                        .catch((error) => {
+                            console.error('Error al procesar los resultados:', error);
+                        });
+                }else if(proveedor=='MANSONS'){
+                    console.log("Formato MANSONS")
+                    cveProveedor = 'VER016';
+                    const tbody = document.getElementById('resultadosBody');
+                    tbody.innerHTML = ''; // Limpia la tabla antes de insertar datos
+                    const regexFecha = /\b\d{4}-\d{2}-\d{2}\b/;
+                    const numeroFactura = jsonData.invoice_number;
+                    const fechaFactura = jsonData.date.match(regexFecha)
+                    const totalMonto = formatPrice(jsonData.total);
+                    const moneda = jsonData.currency_code;
+                    let valoresMercancia = [];
+                    let cantidadUMC = [];
+                    
+                    jsonData.line_items.forEach((item)=>{
+                        let cantidad = item.quantity;
+                        let valoresMerc = formatPrice(item.total);
+                        cantidadUMC.push(cantidad);
+                        valoresMercancia.push(valoresMerc);
+                    })
+                    const promesas = jsonData.line_items.map((item) => {
+                        const texto = item.sku || '';
+                        const coincidencia = texto.match(/\b[a-zA-Z0-9]+(?:\s[a-zA-Z0-9]+)*\b/g); 
+                        //const numerosParte = coincidencia ? coincidencia[0] : null; //Obtengo el primer numero que enuentre
+                        const numerosParte = texto.match(/\b\d+(\.\d+)?[a-zA-Z]*\b|\b[a-zA-Z]+\d+\b/g);
+                        //console.log('valor mercancia ', valoresMercancia, '\numc ',cantidadUMC);
+                        /*if (!numerosParte) {
+                            return Promise.resolve([]); // No se encontraron números de parte
+                        }*/
+                        mensajeConsultando.style.display = "block";
+                        return fetch(`http://localhost:8081/data`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ cveProveedor, text: numerosParte }),
+                        })
+                        .then((response) => {
+                            if (!response.ok) throw new Error('Error en la respuesta del servidor');
+                            return response.json();
+                        })
+                        .catch((error) => {
+                            console.error('Error al obtener los datos:', error);
+                            return [];
+                        });
+                    });
+                    Promise.all(promesas)
+                        .then((resultados) => {
+                            const todosLosResultados = [].concat(...resultados);
+                
+                            todosLosResultados.forEach((row, index) => {
+                                const tr = document.createElement('tr');
+                                const colorFracc = row.NUM_FRACC ? 'bsackground-color: #abebc6;' : 'background-color: #f1948a;';
+                                
+                                tr.innerHTML = `
+                                    <td>${cveProveedor || 'ND'}</td>
+                                    <td>${numeroFactura || 'ND'}</td>
+                                    <td>${fechaFactura || 'ND'}</td>
+                                    <td>$ ${totalMonto || 'ND'}</td>
+                                    <td>${moneda || 'ND'}</td>
+                                    <td>${''}</td>
+                                    <td>${''}</td>
+                                    <td>${''}</td>
+                                    <td>${row.NUM_PART || 'ND'}</td>
+                                    <td></td>
+                                    <td>${''}</td>
+                                    <td style="${colorFracc}">${row.NUM_FRACC || ''}</td>
+                                    <td>${row.DES_MERC || ' '}</td>
+                                    <td>$ ${valoresMercancia[index] || 'No disponible'}</td>
+                                    <td>${''}</td>
+                                    <td>${cantidadUMC[index]}</td>
+                                    <td>${''}</td>
+                                    <td>${''}</td>
+                                    <td>${''}</td>
+                                    <td>${''}</td>
+                                    <td>${''}</td>
+                                    <td>${row.IMP_EXPO || 'ND'}</td>
+                                    <td>${row.EDO_MERC || 'ND'}</td>
+                                    <td>${row.CVE_VINC || 'ND'}</td>
+                                `;
+                                tbody.appendChild(tr);
+
+                                const cells = tr.querySelectorAll('td');
+                                cells.forEach((cell) => {
+                                    if (cell.textContent.trim() === 'No disponible') {
+                                        cell.style.backgroundColor = '#f8d7da'; // Color rojo claro
+                                        cell.style.color = '#721c24'; // Texto en rojo oscuro
+                                    }
+                                });
+                                tablaGenerada.style.display = "block";
+                                mensajeConsultando.style.display = "none";
+                                iconos.style.display="none";
                             });
                 
                             if (todosLosResultados.length === 0) {
@@ -527,6 +901,7 @@
             .then(data => {
                 console.log("ESTADO:", data);
                 setTimeout(() => {
+                    mensajeSubiendo.style.display = "none";
                     cargarDatosSegunProveedor(proveedor);
                 }, 30000);
             })
@@ -539,6 +914,8 @@
     </script>
 
     <script>
+        
+
         function htmlToExcelXLSX(idTabla, nombreArchivo = 'archivo.xlsx') {
             const tabla = document.getElementById(idTabla);
             if (!tabla) {
