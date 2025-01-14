@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="pestanas.css?v=1.0">
     <link rel="icon" href="http://localhost:8080/pdfToExcel%20Dic/ResidenciaGera/Imagenes/Imagen AATLASA.jpg">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/exceljs/dist/exceljs.min.js"></script>
 </head>
 <body>
     <header id="eBotones" class="divBotones">
@@ -25,6 +26,7 @@
             <option class="elemento" value="HITACHI">HITACHI Reliable Solutions</option>
             <option class="elemento" value="WENZHOU">WENZHOU MODERN WESHARE INTERNATIONAL BUSINESS CO., LTD</option>
             <option class="elemento" value="MANSONS">MANSONS Driving change</option>
+            <option class="elemento" value="LPR">LPR</option>
         </select>
         <input class="inputFile1" type="file" id="fileUp-input" onchange="subir()" value="Cargar PDF">
         <button title="Descarga excel" class="btnExcel" onclick="downloadExcel()">
@@ -855,6 +857,108 @@
                         .catch((error) => {
                             console.error('Error al procesar los resultados:', error);
                         });
+                }else if(proveedor == 'LPR'){
+                    console.log("Formato LPR")
+                    cveProveedor = 'VER222';
+                    const tbody = document.getElementById('resultadosBody');
+                    tbody.innerHTML = ''; // Limpia la tabla antes de insertar datos
+                    const regexFecha = /\b\d{4}-\d{2}-\d{2}\b/;
+                    const numeroFactura = jsonData.invoice_number;
+                    const fechaFactura = jsonData.date.match(regexFecha)
+                    const totalMonto = formatPrice(jsonData.total);
+                    const moneda = jsonData.currency_code;
+                    let valoresMercancia = [];
+                    let cantidadUMC = [];
+                    
+                    jsonData.line_items.forEach((item)=>{
+                        let cantidad = item.quantity;
+                        let valoresMerc = formatPrice(item.total);
+                        cantidadUMC.push(cantidad);
+                        valoresMercancia.push(valoresMerc);
+                    })
+                    const promesas = jsonData.line_items.map((item) => {
+                        const texto = item.sku || '';
+                        const coincidencia = texto.match(/\b[a-zA-Z0-9]+(?:\s[a-zA-Z0-9]+)*\b/g); 
+                        //const numerosParte = coincidencia ? coincidencia[0] : null; //Obtengo el primer numero que enuentre
+                        const numerosParte = texto;
+                        //console.log('valor mercancia ', valoresMercancia, '\numc ',cantidadUMC);
+                        /*if (!numerosParte) {
+                            return Promise.resolve([]); // No se encontraron números de parte
+                        }*/
+                        mensajeConsultando.style.display = "block";
+                        return fetch(`http://localhost:8081/data`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ cveProveedor, text: numerosParte }),
+                        })
+                        .then((response) => {
+                            if (!response.ok) throw new Error('Error en la respuesta del servidor');
+                            return response.json();
+                        })
+                        .catch((error) => {
+                            console.error('Error al obtener los datos:', error);
+                            return [];
+                        });
+                    });
+                    Promise.all(promesas)
+                        .then((resultados) => {
+                            const todosLosResultados = [].concat(...resultados);
+                
+                            todosLosResultados.forEach((row, index) => {
+                                const tr = document.createElement('tr');
+                                const colorFracc = row.NUM_FRACC ? 'bsackground-color: #abebc6;' : 'background-color: #f1948a;';
+                                
+                                tr.innerHTML = `
+                                    <td>${cveProveedor || 'ND'}</td>
+                                    <td>${numeroFactura || 'ND'}</td>
+                                    <td>${fechaFactura || 'ND'}</td>
+                                    <td>$ ${totalMonto || 'ND'}</td>
+                                    <td>${moneda || 'ND'}</td>
+                                    <td>${''}</td>
+                                    <td>${''}</td>
+                                    <td>${''}</td>
+                                    <td>${row.NUM_PART || 'ND'}</td>
+                                    <td></td>
+                                    <td>${''}</td>
+                                    <td style="${colorFracc}">${row.NUM_FRACC || ''}</td>
+                                    <td>${row.DES_MERC || ' '}</td>
+                                    <td>$ ${valoresMercancia[index] || 'No disponible'}</td>
+                                    <td>${''}</td>
+                                    <td>${cantidadUMC[index]}</td>
+                                    <td>${''}</td>
+                                    <td>${''}</td>
+                                    <td>${''}</td>
+                                    <td>${''}</td>
+                                    <td>${''}</td>
+                                    <td>${row.IMP_EXPO || 'ND'}</td>
+                                    <td>${row.EDO_MERC || 'ND'}</td>
+                                    <td>${row.CVE_VINC || 'ND'}</td>
+                                `;
+                                tbody.appendChild(tr);
+
+                                const cells = tr.querySelectorAll('td');
+                                cells.forEach((cell) => {
+                                    if (cell.textContent.trim() === 'No disponible') {
+                                        cell.style.backgroundColor = '#f8d7da'; // Color rojo claro
+                                        cell.style.color = '#721c24'; // Texto en rojo oscuro
+                                    }
+                                });
+                                tablaGenerada.style.display = "block";
+                                mensajeConsultando.style.display = "none";
+                                iconos.style.display="none";
+                            });
+                
+                            if (todosLosResultados.length === 0) {
+                                const tr = document.createElement('tr');
+                                tr.innerHTML = `<td colspan="24">No se encontraron resultados.</td>`;
+                                tbody.appendChild(tr);
+                            }
+                        })
+                        .catch((error) => {
+                            console.error('Error al procesar los resultados:', error);
+                        });
                 }
             })
             .catch(error => {
@@ -914,55 +1018,68 @@
     </script>
 
     <script>
-        
-
         function htmlToExcelXLSX(idTabla, nombreArchivo = 'archivo.xlsx') {
-            const tabla = document.getElementById(idTabla);
-            if (!tabla) {
-                alert('La tabla no tiene datos, por favor, importa un PDF.');
+            if (typeof ExcelJS === "undefined") {
+                alert("ExcelJS no está cargado. Verifica la inclusión del script.");
                 return;
             }
 
-            // Convierte las filas de la tabla en un arreglo de arreglos (AOA)
+            const tabla = document.getElementById(idTabla);
+            if (!tabla) {
+                alert('La tabla no tiene datos. Por favor, revisa el ID.');
+                return;
+            }
+
             const filas = Array.from(tabla.querySelectorAll('tr')).map(fila =>
                 Array.from(fila.querySelectorAll('th, td')).map(celda => celda.innerText.trim())
             );
 
-            // Crea el libro y la hoja de trabajo
-            const workbook = XLSX.utils.book_new();
-            const worksheet = XLSX.utils.aoa_to_sheet(filas);
+            const workbook = new ExcelJS.Workbook();
+            const worksheet = workbook.addWorksheet("Layout de Factura");
 
-            // Aplica estilos a los encabezados (primera fila)
-            const encabezados = filas[0]; // Primera fila (encabezados)
-            encabezados.forEach((_, index) => {
-                const cellAddress = XLSX.utils.encode_cell({ r: 0, c: index }); // Fila 0, columna `index`
-                if (!worksheet[cellAddress]) return;
-                
-                worksheet[cellAddress].s = {
-                    font: {
-                        bold: true,
-                        color: { rgb: "4169E1" } // Color del texto blanco
-                    },
-                    fill: {
-                        patternType: "solid", // Asegura un color de fondo sólido
-                        fgColor: { rgb: "4CAF50" } // Color de fondo verde
-                    },
-                    alignment: {
-                        horizontal: "center", // Centrado horizontal
-                        vertical: "center" // Centrado vertical
-                    },
-                    border: {
-                        top: { style: "thin", color: { rgb: "000000" } },
-                        bottom: { style: "thin", color: { rgb: "000000" } },
-                        left: { style: "thin", color: { rgb: "000000" } },
-                        right: { style: "thin", color: { rgb: "000000" } },
-                    }
-                };
+            filas.forEach((fila, index) => {
+                const filaExcel = worksheet.addRow(fila);
+
+                if (index === 0) {
+                    filaExcel.eachCell(cell => {
+                        cell.font = { bold: true, color: { argb: "FFFFFFFF" } };
+                        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: "16365C" } };
+                        cell.alignment = { horizontal: 'center', vertical: 'middle' };
+                        cell.border = {
+                            top: { style: 'thin' },
+                            left: { style: 'thin' },
+                            bottom: { style: 'thin' },
+                            right: { style: 'thin' }
+                        };
+                    });
+
+                    filaExcel.height = 25;
+                }else {
+                    // Aplica formato condicional: celdas con texto 'No disponible' se rellenan con rojo claro
+                    filaExcel.eachCell(cell => {
+                        if (cell.value === "No disponible") {
+                            cell.fill = {
+                                type: 'pattern',
+                                pattern: 'solid',
+                                fgColor: { argb: "FFCCCC" } // Rojo claro
+                            };
+                            cell.font = { color: { argb: "FF0000" } }; // Texto rojo
+                        }
+                    });
+                }
             });
 
-            // Agrega la hoja al libro y descarga
-            XLSX.utils.book_append_sheet(workbook, worksheet, "Layout de Factura");
-            XLSX.writeFile(workbook, nombreArchivo);
+            workbook.xlsx.writeBuffer().then(buffer => {
+                const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+                const link = document.createElement("a");
+                link.href = URL.createObjectURL(blob);
+                link.download = nombreArchivo;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }).catch(err => {
+                console.error("Error al generar el archivo Excel:", err);
+            });
         }
 
         function downloadExcel() {
@@ -977,7 +1094,6 @@
     </script>
     <div class = "creditos">
         <div class="creditos-texto">
-            
             © 2025 Verify OCR. Utiliza el servicio de Verify OCR Invoices. Departamento de Sistemas, Tecno Logistica Aduanal S.A de C.V, Nuevo Laredo, Tamps.
     </div>
 </body>
