@@ -17,7 +17,7 @@
             
         </div>
         <img src="http://localhost:8080/pdfToExcel%20Dic/ResidenciaGera/Imagenes/AATLA_Logo_FObscuros.png" alt="Logo" class="logo">
-        <select name="Selecciona un Proveedor" class="listaProveedores" id="proveedorSelect" onchange="cargarDatosSegunProveedor(this.value)"> <!--onchange="cargarDatosSegunProveedor(this.value)"-->
+        <select name="Selecciona un Proveedor" class="listaProveedores" id="proveedorSelect" > <!--onchange="cargarDatosSegunProveedor(this.value)"-->
             <option class="elemento" value="">Selecciona un proveedor</option>
             <option class="elemento" value="EDITORIAL JUVENTUD" >EDITORIAL JUVENTUD S.A.</option>
             <option class="elemento" value="NINGBO DYNACO HYDRAULIC">NINGBO DYNACO HYDRAULIC CO., LTD.</option>
@@ -111,6 +111,7 @@
     </div> -->
 
     <script>
+        let numeroFacturaNombre = '';
         const iconos = document.getElementById("iconosInicio");
         const tablaGenerada = document.getElementById("tablaGenerada");
         const mensajeSubiendo = document.getElementById("subiendoMsj");
@@ -135,6 +136,7 @@
                     tbody.innerHTML = ''; // Limpia la tabla antes de insertar datos
                     const regexFecha = /\b\d{4}-\d{2}-\d{2}\b/;
                     const numeroFactura = jsonData.invoice_number;
+                    numeroFacturaNombre = `Layout_Factura_${numeroFactura}`;
                     const fechaFactura = jsonData.date.match(regexFecha)
                     const totalMonto = formatPrice(jsonData.total);
                     const moneda = jsonData.currency_code;
@@ -243,6 +245,7 @@
                     const regexFecha = /\b\d{4}-\d{2}-\d{2}\b/;
                     let cveProveedor = 'TON23'
                     const numeroFactura = jsonData.invoice_number;
+                    numeroFacturaNombre = `Layout_Factura_${numeroFactura}`;
                     const fechaFactura = jsonData.date.match(regexFecha);
                     const totalMonto = formatPrice(jsonData.total);
                     const moneda = jsonData.currency_code;
@@ -348,6 +351,7 @@
                     tbody.innerHTML = ''; // Limpia la tabla antes de insertar datos
                     const regexFecha = /\b\d{4}-\d{2}-\d{2}\b/;
                     const numeroFactura = jsonData.invoice_number;
+                    numeroFacturaNombre = `Layout_Factura_${numeroFactura}`;
                     const fechaFactura = jsonData.date.match(regexFecha)
                     const totalMonto = formatPrice(jsonData.total);
                     const moneda = jsonData.currency_code;
@@ -452,6 +456,7 @@
                     tbody.innerHTML = ''; // Limpia la tabla antes de insertar datos
                     const regexFecha = /\b\d{4}-\d{2}-\d{2}\b/;
                     const numeroFactura = jsonData.invoice_number;
+                    numeroFacturaNombre = `Layout_Factura_${numeroFactura}`;
                     const fechaFactura = jsonData.date.match(regexFecha)
                     const totalMonto = formatPrice(jsonData.total);
                     const moneda = jsonData.currency_code;
@@ -556,6 +561,7 @@
                     tbody.innerHTML = ''; // Limpia la tabla antes de insertar datos
                     const regexFecha = /\b\d{4}-\d{2}-\d{2}\b/;
                     const numeroFactura = jsonData.invoice_number;
+                    numeroFacturaNombre = `Layout_Factura_${numeroFactura}`;
                     const fechaFactura = jsonData.date.match(regexFecha)
                     const totalMonto = formatPrice(jsonData.total);
                     const moneda = jsonData.currency_code;
@@ -659,6 +665,7 @@
                     tbody.innerHTML = ''; // Limpia la tabla antes de insertar datos
                     const regexFecha = /\b\d{4}-\d{2}-\d{2}\b/;
                     const numeroFactura = jsonData.invoice_number;
+                    numeroFacturaNombre = `Layout_Factura_${numeroFactura}`;
                     const fechaFactura = jsonData.date.match(regexFecha)
                     const totalMonto = formatPrice(jsonData.total);
                     const moneda = jsonData.currency_code;
@@ -762,6 +769,7 @@
                     tbody.innerHTML = ''; // Limpia la tabla antes de insertar datos
                     const regexFecha = /\b\d{4}-\d{2}-\d{2}\b/;
                     const numeroFactura = jsonData.invoice_number;
+                    numeroFacturaNombre = `Layout_Factura_${numeroFactura}`;
                     const fechaFactura = jsonData.date.match(regexFecha)
                     const totalMonto = formatPrice(jsonData.total);
                     const moneda = jsonData.currency_code;
@@ -864,6 +872,7 @@
                     tbody.innerHTML = ''; // Limpia la tabla antes de insertar datos
                     const regexFecha = /\b\d{4}-\d{2}-\d{2}\b/;
                     const numeroFactura = jsonData.invoice_number;
+                    numeroFacturaNombre = `Layout_Factura_${numeroFactura}`;
                     const fechaFactura = jsonData.date.match(regexFecha)
                     const totalMonto = formatPrice(jsonData.total);
                     const moneda = jsonData.currency_code;
@@ -1041,33 +1050,63 @@
                 const filaExcel = worksheet.addRow(fila);
 
                 if (index === 0) {
+                    filaExcel.height = 55;
                     filaExcel.eachCell(cell => {
-                        cell.font = { bold: true, color: { argb: "FFFFFFFF" } };
+                        
+                        cell.font = { name: 'Arial', bold: true, color: { argb: "FFFFFFFF" } };
                         cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: "16365C" } };
-                        cell.alignment = { horizontal: 'center', vertical: 'middle' };
+                        cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
                         cell.border = {
                             top: { style: 'thin' },
                             left: { style: 'thin' },
                             bottom: { style: 'thin' },
                             right: { style: 'thin' }
                         };
+
+                        if (cell.value === "SUBDIVISION" || cell.value === "CERT. ORIGEN") {
+                            cell.font = { name: 'Arial', bold: true, color: { argb: "FFFFFFFF" } };
+                            cell.fill = {
+                                type: 'pattern',
+                                pattern: 'solid',
+                                fgColor: { argb: "E26B0A" } // color Naranja
+                            };
+                            
+                        }
+
+                        if (cell.value === "Marca" || cell.value === "Submodelo" || cell.value === "No. Serie") {
+                            cell.font = { name: 'Arial', bold: true, color: { argb: "FFFFFFFF" } };
+                            cell.fill = {
+                                type: 'pattern',
+                                pattern: 'solid',
+                                fgColor: { argb: "C4BD97" } //Color arena
+                            };
+                            
+                        }
                     });
 
-                    filaExcel.height = 25;
+                    
                 }else {
                     // Aplica formato condicional: celdas con texto 'No disponible' se rellenan con rojo claro
                     filaExcel.eachCell(cell => {
+                        cell.font = { name: 'Arial', color: { argb: "000000" } };
+                        cell.alignment = { wrapText: true };
                         if (cell.value === "No disponible") {
                             cell.fill = {
                                 type: 'pattern',
                                 pattern: 'solid',
                                 fgColor: { argb: "FFCCCC" } // Rojo claro
                             };
-                            cell.font = { color: { argb: "FF0000" } }; // Texto rojo
+                            cell.font = { name: 'Arial', color: { argb: "FF0000" } }; // Texto rojo
                         }
                     });
                 }
             });
+
+            worksheet.columns = filas[0].map((_, colIndex) => ({
+                width: Math.max(
+                    ...filas.map(fila => (fila[colIndex]?.length || 0)) // Longitud máxima de la columna
+                ) + 4 // Espacio extra para un margen
+            }));
 
             workbook.xlsx.writeBuffer().then(buffer => {
                 const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
@@ -1087,7 +1126,7 @@
             let formattedDate = now.toISOString().slice(0, 10);
             let formattedTime = now.toTimeString().slice(0, 8).replace(/:/g, '-');
             let timestamp = `${formattedDate}_${formattedTime}`;
-            let fileName = `layout_${timestamp}.xlsx`;
+            let fileName = `${numeroFacturaNombre}.xlsx`;
             htmlToExcelXLSX('resultadosTable', fileName);
         }
         
