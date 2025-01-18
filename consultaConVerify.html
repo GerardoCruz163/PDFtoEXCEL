@@ -27,6 +27,8 @@
             <option class="elemento" value="WENZHOU">WENZHOU MODERN WESHARE INTERNATIONAL BUSINESS CO., LTD</option>
             <option class="elemento" value="MANSONS">MANSONS Driving change</option>
             <option class="elemento" value="LPR">LPR</option>
+            <option class="elemento" value="LC DESIGNS">LC DESIGNS TRADING CO., LIMITED</option>
+            <option class="elemento" value="NEXGENPM">NEXGEN PACKAGING MEXICO</option>
         </select>
         <input class="inputFile1" type="file" id="fileUp-input" onchange="subir()" value="Cargar PDF">
         <button title="Descarga excel" class="btnExcel" onclick="downloadExcel()">
@@ -35,6 +37,7 @@
                 <path d="M7 11l5 5l5 -5"></path>
                 <path d="M12 4l0 12"></path>
             </svg>
+            Descargar Excel
         </button>
         <div class="enlaceDiv">
 
@@ -112,6 +115,7 @@
 
     <script>
         let numeroFacturaNombre = '';
+        let invoiceNum = '';
         const iconos = document.getElementById("iconosInicio");
         const tablaGenerada = document.getElementById("tablaGenerada");
         const mensajeSubiendo = document.getElementById("subiendoMsj");
@@ -136,6 +140,7 @@
                     tbody.innerHTML = ''; // Limpia la tabla antes de insertar datos
                     const regexFecha = /\b\d{4}-\d{2}-\d{2}\b/;
                     const numeroFactura = jsonData.invoice_number;
+                    invoiceNum = jsonData.invoice_number;
                     numeroFacturaNombre = `Layout_Factura_${numeroFactura}`;
                     const fechaFactura = jsonData.date.match(regexFecha)
                     const totalMonto = formatPrice(jsonData.total);
@@ -245,6 +250,7 @@
                     const regexFecha = /\b\d{4}-\d{2}-\d{2}\b/;
                     let cveProveedor = 'TON23'
                     const numeroFactura = jsonData.invoice_number;
+                    invoiceNum = jsonData.invoice_number;
                     numeroFacturaNombre = `Layout_Factura_${numeroFactura}`;
                     const fechaFactura = jsonData.date.match(regexFecha);
                     const totalMonto = formatPrice(jsonData.total);
@@ -351,6 +357,7 @@
                     tbody.innerHTML = ''; // Limpia la tabla antes de insertar datos
                     const regexFecha = /\b\d{4}-\d{2}-\d{2}\b/;
                     const numeroFactura = jsonData.invoice_number;
+                    invoiceNum = jsonData.invoice_number;
                     numeroFacturaNombre = `Layout_Factura_${numeroFactura}`;
                     const fechaFactura = jsonData.date.match(regexFecha)
                     const totalMonto = formatPrice(jsonData.total);
@@ -456,6 +463,7 @@
                     tbody.innerHTML = ''; // Limpia la tabla antes de insertar datos
                     const regexFecha = /\b\d{4}-\d{2}-\d{2}\b/;
                     const numeroFactura = jsonData.invoice_number;
+                    invoiceNum = jsonData.invoice_number;
                     numeroFacturaNombre = `Layout_Factura_${numeroFactura}`;
                     const fechaFactura = jsonData.date.match(regexFecha)
                     const totalMonto = formatPrice(jsonData.total);
@@ -561,6 +569,7 @@
                     tbody.innerHTML = ''; // Limpia la tabla antes de insertar datos
                     const regexFecha = /\b\d{4}-\d{2}-\d{2}\b/;
                     const numeroFactura = jsonData.invoice_number;
+                    invoiceNum = jsonData.invoice_number;
                     numeroFacturaNombre = `Layout_Factura_${numeroFactura}`;
                     const fechaFactura = jsonData.date.match(regexFecha)
                     const totalMonto = formatPrice(jsonData.total);
@@ -665,6 +674,7 @@
                     tbody.innerHTML = ''; // Limpia la tabla antes de insertar datos
                     const regexFecha = /\b\d{4}-\d{2}-\d{2}\b/;
                     const numeroFactura = jsonData.invoice_number;
+                    invoiceNum = jsonData.invoice_number;
                     numeroFacturaNombre = `Layout_Factura_${numeroFactura}`;
                     const fechaFactura = jsonData.date.match(regexFecha)
                     const totalMonto = formatPrice(jsonData.total);
@@ -769,6 +779,7 @@
                     tbody.innerHTML = ''; // Limpia la tabla antes de insertar datos
                     const regexFecha = /\b\d{4}-\d{2}-\d{2}\b/;
                     const numeroFactura = jsonData.invoice_number;
+                    invoiceNum = jsonData.invoice_number;
                     numeroFacturaNombre = `Layout_Factura_${numeroFactura}`;
                     const fechaFactura = jsonData.date.match(regexFecha)
                     const totalMonto = formatPrice(jsonData.total);
@@ -872,6 +883,7 @@
                     tbody.innerHTML = ''; // Limpia la tabla antes de insertar datos
                     const regexFecha = /\b\d{4}-\d{2}-\d{2}\b/;
                     const numeroFactura = jsonData.invoice_number;
+                    invoiceNum = jsonData.invoice_number;
                     numeroFacturaNombre = `Layout_Factura_${numeroFactura}`;
                     const fechaFactura = jsonData.date.match(regexFecha)
                     const totalMonto = formatPrice(jsonData.total);
@@ -890,6 +902,215 @@
                         const coincidencia = texto.match(/\b[a-zA-Z0-9]+(?:\s[a-zA-Z0-9]+)*\b/g); 
                         //const numerosParte = coincidencia ? coincidencia[0] : null; //Obtengo el primer numero que enuentre
                         const numerosParte = texto;
+                        //console.log('valor mercancia ', valoresMercancia, '\numc ',cantidadUMC);
+                        /*if (!numerosParte) {
+                            return Promise.resolve([]); // No se encontraron números de parte
+                        }*/
+                        mensajeConsultando.style.display = "block";
+                        return fetch(`http://localhost:8081/data`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ cveProveedor, text: numerosParte }),
+                        })
+                        .then((response) => {
+                            if (!response.ok) throw new Error('Error en la respuesta del servidor');
+                            return response.json();
+                        })
+                        .catch((error) => {
+                            console.error('Error al obtener los datos:', error);
+                            return [];
+                        });
+                    });
+                    Promise.all(promesas)
+                        .then((resultados) => {
+                            const todosLosResultados = [].concat(...resultados);
+                
+                            todosLosResultados.forEach((row, index) => {
+                                const tr = document.createElement('tr');
+                                const colorFracc = row.NUM_FRACC ? 'bsackground-color: #abebc6;' : 'background-color: #f1948a;';
+                                
+                                tr.innerHTML = `
+                                    <td>${cveProveedor || 'ND'}</td>
+                                    <td>${numeroFactura || 'ND'}</td>
+                                    <td>${fechaFactura || 'ND'}</td>
+                                    <td>$ ${totalMonto || 'ND'}</td>
+                                    <td>${moneda || 'ND'}</td>
+                                    <td>${''}</td>
+                                    <td>${''}</td>
+                                    <td>${''}</td>
+                                    <td>${row.NUM_PART || 'ND'}</td>
+                                    <td></td>
+                                    <td>${''}</td>
+                                    <td style="${colorFracc}">${row.NUM_FRACC || ''}</td>
+                                    <td>${row.DES_MERC || ' '}</td>
+                                    <td>$ ${valoresMercancia[index] || 'No disponible'}</td>
+                                    <td>${''}</td>
+                                    <td>${cantidadUMC[index]}</td>
+                                    <td>${''}</td>
+                                    <td>${''}</td>
+                                    <td>${''}</td>
+                                    <td>${''}</td>
+                                    <td>${''}</td>
+                                    <td>${row.IMP_EXPO || 'ND'}</td>
+                                    <td>${row.EDO_MERC || 'ND'}</td>
+                                    <td>${row.CVE_VINC || 'ND'}</td>
+                                `;
+                                tbody.appendChild(tr);
+
+                                const cells = tr.querySelectorAll('td');
+                                cells.forEach((cell) => {
+                                    if (cell.textContent.trim() === 'No disponible') {
+                                        cell.style.backgroundColor = '#f8d7da'; // Color rojo claro
+                                        cell.style.color = '#721c24'; // Texto en rojo oscuro
+                                    }
+                                });
+                                tablaGenerada.style.display = "block";
+                                mensajeConsultando.style.display = "none";
+                                iconos.style.display="none";
+                            });
+                
+                            if (todosLosResultados.length === 0) {
+                                const tr = document.createElement('tr');
+                                tr.innerHTML = `<td colspan="24">No se encontraron resultados.</td>`;
+                                tbody.appendChild(tr);
+                            }
+                        })
+                        .catch((error) => {
+                            console.error('Error al procesar los resultados:', error);
+                        });
+                }else if(proveedor =='LC DESIGNS'){
+                    console.log("Formato LC DESIGNS")
+                    cveProveedor = 'LCDE';
+                    const tbody = document.getElementById('resultadosBody');
+                    tbody.innerHTML = ''; // Limpia la tabla antes de insertar datos
+                    const regexFecha = /\b\d{4}-\d{2}-\d{2}\b/;
+                    const numeroFactura = jsonData.invoice_number;
+                    invoiceNum = jsonData.invoice_number;
+                    numeroFacturaNombre = `Layout_Factura_${numeroFactura}`;
+                    const fechaFactura = jsonData.date.match(regexFecha)
+                    const totalMonto = formatPrice(jsonData.total);
+                    const moneda = jsonData.currency_code;
+                    let valoresMercancia = [];
+                    let cantidadUMC = [];
+                    
+                    jsonData.line_items.forEach((item)=>{
+                        let cantidad = item.quantity;
+                        let valoresMerc = formatPrice(item.total);
+                        cantidadUMC.push(cantidad);
+                        valoresMercancia.push(valoresMerc);
+                    })
+                    const promesas = jsonData.line_items.map((item) => {
+                        const texto = item.sku || '';
+                        const coincidencia = texto.match(/\b[a-zA-Z0-9]+(?:\s[a-zA-Z0-9]+)*\b/g); 
+                        //const numerosParte = coincidencia ? coincidencia[0] : null; //Obtengo el primer numero que enuentre
+                        const numerosParte = texto;
+                        //console.log('valor mercancia ', valoresMercancia, '\numc ',cantidadUMC);
+                        /*if (!numerosParte) {
+                            return Promise.resolve([]); // No se encontraron números de parte
+                        }*/
+                        mensajeConsultando.style.display = "block";
+                        return fetch(`http://localhost:8081/data`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ cveProveedor, text: numerosParte }),
+                        })
+                        .then((response) => {
+                            if (!response.ok) throw new Error('Error en la respuesta del servidor');
+                            return response.json();
+                        })
+                        .catch((error) => {
+                            console.error('Error al obtener los datos:', error);
+                            return [];
+                        });
+                    });
+                    Promise.all(promesas)
+                        .then((resultados) => {
+                            const todosLosResultados = [].concat(...resultados);
+                
+                            todosLosResultados.forEach((row, index) => {
+                                const tr = document.createElement('tr');
+                                const colorFracc = row.NUM_FRACC ? 'bsackground-color: #abebc6;' : 'background-color: #f1948a;';
+                                
+                                tr.innerHTML = `
+                                    <td>${cveProveedor || 'ND'}</td>
+                                    <td>${numeroFactura || 'ND'}</td>
+                                    <td>${fechaFactura || 'ND'}</td>
+                                    <td>$ ${totalMonto || 'ND'}</td>
+                                    <td>${moneda || 'ND'}</td>
+                                    <td>${''}</td>
+                                    <td>${''}</td>
+                                    <td>${''}</td>
+                                    <td>${row.NUM_PART || 'ND'}</td>
+                                    <td></td>
+                                    <td>${''}</td>
+                                    <td style="${colorFracc}">${row.NUM_FRACC || ''}</td>
+                                    <td>${row.DES_MERC || ' '}</td>
+                                    <td>$ ${valoresMercancia[index] || 'No disponible'}</td>
+                                    <td>${''}</td>
+                                    <td>${cantidadUMC[index]}</td>
+                                    <td>${''}</td>
+                                    <td>${''}</td>
+                                    <td>${''}</td>
+                                    <td>${''}</td>
+                                    <td>${''}</td>
+                                    <td>${row.IMP_EXPO || 'ND'}</td>
+                                    <td>${row.EDO_MERC || 'ND'}</td>
+                                    <td>${row.CVE_VINC || 'ND'}</td>
+                                `;
+                                tbody.appendChild(tr);
+
+                                const cells = tr.querySelectorAll('td');
+                                cells.forEach((cell) => {
+                                    if (cell.textContent.trim() === 'No disponible') {
+                                        cell.style.backgroundColor = '#f8d7da'; // Color rojo claro
+                                        cell.style.color = '#721c24'; // Texto en rojo oscuro
+                                    }
+                                });
+                                tablaGenerada.style.display = "block";
+                                mensajeConsultando.style.display = "none";
+                                iconos.style.display="none";
+                            });
+                
+                            if (todosLosResultados.length === 0) {
+                                const tr = document.createElement('tr');
+                                tr.innerHTML = `<td colspan="24">No se encontraron resultados.</td>`;
+                                tbody.appendChild(tr);
+                            }
+                        })
+                        .catch((error) => {
+                            console.error('Error al procesar los resultados:', error);
+                        });
+                }else if(proveedor == 'NEXGENPM'){
+                    console.log("Formato nexgen")
+                    cveProveedor = 'NPM170';
+                    const tbody = document.getElementById('resultadosBody');
+                    tbody.innerHTML = ''; // Limpia la tabla antes de insertar datos
+                    const regexFecha = /\b\d{4}-\d{2}-\d{2}\b/;
+                    const numeroFactura = jsonData.invoice_number;
+                    invoiceNum = jsonData.invoice_number;
+                    numeroFacturaNombre = `Layout_Factura_${numeroFactura}`;
+                    const fechaFactura = jsonData.date.match(regexFecha)
+                    const totalMonto = formatPrice(jsonData.total);
+                    const moneda = jsonData.currency_code;
+                    let valoresMercancia = [];
+                    let cantidadUMC = [];
+                    
+                    jsonData.line_items.forEach((item)=>{
+                        let cantidad = item.quantity;
+                        let valoresMerc = formatPrice(item.total);
+                        cantidadUMC.push(cantidad);
+                        valoresMercancia.push(valoresMerc);
+                    })
+                    const promesas = jsonData.line_items.map((item) => {
+                        const texto = item.description || '';
+                        const coincidencia = texto.match(/\b[A-Z]{3}-[A-Z]{2}(?:\/[A-Z0-9]+)*\/\d{5,7}(?:\/[A-Z0-9]+)*\b/g); 
+                        const numerosParte = coincidencia; //Obtengo el primer numero que enuentre
+                        console.log(numerosParte);
+                        //const numerosParte = texto;
                         //console.log('valor mercancia ', valoresMercancia, '\numc ',cantidadUMC);
                         /*if (!numerosParte) {
                             return Promise.resolve([]); // No se encontraron números de parte
@@ -1029,7 +1250,7 @@
     <script>
         function htmlToExcelXLSX(idTabla, nombreArchivo = 'archivo.xlsx') {
             if (typeof ExcelJS === "undefined") {
-                alert("ExcelJS no está cargado. Verifica la inclusión del script.");
+                alert("ExcelJS error.");
                 return;
             }
 
@@ -1044,7 +1265,7 @@
             );
 
             const workbook = new ExcelJS.Workbook();
-            const worksheet = workbook.addWorksheet("Layout de Factura");
+            const worksheet = workbook.addWorksheet(`Layout de Factura ${invoiceNum}`);
 
             filas.forEach((fila, index) => {
                 const filaExcel = worksheet.addRow(fila);
