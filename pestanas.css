@@ -456,4 +456,75 @@ a{
   margin-bottom: 20px;
 }
 
+/* lista de sugerencias*/
+.container {
+	max-width: 400px;
+  height: auto;
+	margin: 10px ;
+}
 
+.search-input-box {
+	width: 90%;
+	background-color: #2f3640;
+	border-radius: 5px;
+	position: relative;
+	color: #f5f6f4;
+	box-shadow: 0 1px 5px 3px rgba(0, 0, 0, 0.12);
+}
+
+.search-input-box input {
+	width: 80%;
+	border: none;
+	outline: none;
+	border-radius: 5px;
+	height: 55px;
+	padding: 0 30px 0 20px;
+	font-size: 18px;
+}
+
+.icon {
+	position: absolute;
+	top: 15px;
+	right: 25px;
+	font-size: 22px;
+	cursor: pointer;
+	color: #0d141f;
+}
+
+/* Contenedor de sugerencias */
+/* Contenedor de sugerencias */
+.container-suggestions {
+  max-height: 500px; /* Limitar la altura máxima para evitar que crezca demasiado */
+  overflow-y: auto; /* Habilitar el desplazamiento si hay muchas sugerencias */
+  position: absolute; /* Hace que se superponga al contenido */
+  top: 60px; /* Ajusta la posición respecto al input */
+  left: 0;
+  width: 100%; /* Asegura que tenga el mismo ancho que el input */
+  z-index: 1000; /* Asegura que se superponga a otros elementos */
+  background-color: #2f3640; /* Fondo para que sea consistente */
+  border-radius: 5px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); /* Sombra para resaltar */
+  opacity: 0;
+  pointer-events: none; /* Por defecto está oculto */
+  transition: opacity 0.2s ease; /* Transición suave */
+}
+
+/* Cuando se activa el contenedor de búsqueda */
+.search-input-box.active .container-suggestions {
+  opacity: 1;
+  pointer-events: auto; /* Activa la interacción cuando está visible */
+}
+
+/* Sugerencias individuales */
+.container-suggestions li {
+  list-style: none;
+  padding: 10px 15px;
+  border-bottom: 1px solid #414b57; /* Línea entre elementos */
+  cursor: pointer;
+  color: #f5f6f4;
+}
+
+/* Hover para resaltar sugerencia */
+.container-suggestions li:hover {
+  background-color: #414b57;
+}

@@ -10,8 +10,10 @@
     <link rel="icon" href="http://localhost:8080/pdfToExcel%20Dic/ResidenciaGera/Imagenes/Imagen AATLASA.jpg">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/exceljs/dist/exceljs.min.js"></script>
+    
 </head>
 <body>
+
     <header id="eBotones" class="divBotones">
         <div class="imagenFondo">
             
@@ -19,7 +21,7 @@
         <img src="http://localhost:8080/pdfToExcel%20Dic/ResidenciaGera/Imagenes/AATLA_Logo_FObscuros.png" alt="Logo" class="logo">
 
         <!-- LISTA DE PROVEEDORES -->
-        <select name="Selecciona un Proveedor" class="listaProveedores" id="proveedorSelect" onchange="cargarDatosSegunProveedor(this.value)"> <!--onchange="cargarDatosSegunProveedor(this.value)"-->
+        <!-- <select name="Selecciona un Proveedor" class="listaProveedores" id="proveedorSelect" > 
             <option class="elemento" value="">Selecciona un proveedor</option>
             <option class="elemento" value="EDITORIAL JUVENTUD" >EDITORIAL JUVENTUD S.A.</option>
             <option class="elemento" value="NINGBO DYNACO HYDRAULIC">NINGBO DYNACO HYDRAULIC CO., LTD.</option>
@@ -31,7 +33,29 @@
             <option class="elemento" value="LPR">LPR</option>
             <option class="elemento" value="LC DESIGNS">LC DESIGNS TRADING CO., LIMITED</option>
             <option class="elemento" value="NEXGENPM">NEXGEN PACKAGING MEXICO</option>
-        </select>
+        </select> -->
+        
+        <div class="container">
+            <div class="search-input-box">
+                <input
+                    type="text"
+                    placeholder="Busca un proveedor"
+                    class="listaProveedores"
+                    id="proveedorSelect"
+                />
+                <a href="#" target="_blank">
+                    <i class="fa-solid fa-magnifying-glass icon"></i>
+                </a>
+                <ul class="container-suggestions" id="suggestionsBox">
+                    <!-- Las sugerencias se mostrarán aquí dinámicamente -->
+                </ul>
+            </div>
+        </div>
+        
+        <script src="suggestions.js"></script>
+        <script src="main.js"></script>
+        
+
 
         <!-- CARGA DE ARCHIVOS -->
         <input class="inputFile1" type="file" id="fileUp-input" onchange="subir()" value="Cargar PDF">
@@ -138,7 +162,7 @@
                 return response.json();
             })
             .then(jsonData => {
-                if (proveedor === "EDITORIAL JUVENTUD") {
+                if (proveedor === "EDITORIAL JUVENTUD S.A.") {
                     console.log("Formato VER106");
                     cveProveedor = 'VER106';
                     const tbody = document.getElementById('resultadosBody');
@@ -173,7 +197,7 @@
                             return Promise.resolve([]); // No se encontraron números de parte
                         }*/
                         mensajeConsultando.style.display = "block";
-                        return fetch(`http://localhost:8081/data`, {
+                        return fetch(`http://192.168.10.69:8081/data`, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -248,7 +272,7 @@
                         .catch((error) => {
                             console.error('Error al procesar los resultados:', error);
                         });
-                }else if(proveedor == "NINGBO DYNACO HYDRAULIC"){
+                }else if(proveedor == "NINGBO DYNACO HYDRAULIC CO., LTD."){
                     console.log("Formato TON23")
                     const tbody = document.getElementById('resultadosBody');
                     tbody.innerHTML = ''; // Limpia la tabla antes de insertar datos
@@ -280,7 +304,7 @@
                         
                         console.log(numeroParte);
                         mensajeConsultando.style.display = "block";
-                        return fetch(`http://localhost:8081/data`, {
+                        return fetch(`http://192.168.10.69:8081/data`, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -386,7 +410,7 @@
                             return Promise.resolve([]); // No se encontraron números de parte
                         }*/
                         mensajeConsultando.style.display = "block";
-                        return fetch(`http://localhost:8081/data`, {
+                        return fetch(`http://192.168.10.69:8081/data`, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -492,7 +516,7 @@
                             return Promise.resolve([]); // No se encontraron números de parte
                         }*/
                         mensajeConsultando.style.display = "block";
-                        return fetch(`http://localhost:8081/data`, {
+                        return fetch(`http://192.168.10.69:8081/data`, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -567,7 +591,7 @@
                         .catch((error) => {
                             console.error('Error al procesar los resultados:', error);
                         });
-                }else if(proveedor == "HITACHI"){
+                }else if(proveedor == "HITACHI Reliable Solutions"){
                     console.log("Formato HITACHI")
                     cveProveedor = 'NLD-86';
                     const tbody = document.getElementById('resultadosBody');
@@ -598,7 +622,7 @@
                             return Promise.resolve([]); // No se encontraron números de parte
                         }*/
                         mensajeConsultando.style.display = "block";
-                        return fetch(`http://localhost:8081/data`, {
+                        return fetch(`http://192.168.10.69:8081/data`, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -672,7 +696,7 @@
                         .catch((error) => {
                             console.error('Error al procesar los resultados:', error);
                         });
-                }else if(proveedor=='WENZHOU'){
+                }else if(proveedor=='WENZHOU MODERN WESHARE INTERNATIONAL BUSINESS CO., LTD'){
                     console.log("Formato HITACHI")
                     cveProveedor = 'NLD-86';
                     const tbody = document.getElementById('resultadosBody');
@@ -703,7 +727,7 @@
                             return Promise.resolve([]); // No se encontraron números de parte
                         }*/
                         mensajeConsultando.style.display = "block";
-                        return fetch(`http://localhost:8081/data`, {
+                        return fetch(`http://192.168.10.69:8081/data`, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -777,7 +801,7 @@
                         .catch((error) => {
                             console.error('Error al procesar los resultados:', error);
                         });
-                }else if(proveedor=='MANSONS'){
+                }else if(proveedor=='MANSONS Driving change'){
                     console.log("Formato MANSONS")
                     cveProveedor = 'VER016';
                     const tbody = document.getElementById('resultadosBody');
@@ -808,7 +832,7 @@
                             return Promise.resolve([]); // No se encontraron números de parte
                         }*/
                         mensajeConsultando.style.display = "block";
-                        return fetch(`http://localhost:8081/data`, {
+                        return fetch(`http://192.168.10.69:8081/data`, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -912,7 +936,7 @@
                             return Promise.resolve([]); // No se encontraron números de parte
                         }*/
                         mensajeConsultando.style.display = "block";
-                        return fetch(`http://localhost:8081/data`, {
+                        return fetch(`http://192.168.10.69:8081/data`, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -985,7 +1009,7 @@
                         .catch((error) => {
                             console.error('Error al procesar los resultados:', error);
                         });
-                }else if(proveedor =='LC DESIGNS'){
+                }else if(proveedor =='LC DESIGNS TRADING CO., LIMITED'){
                     console.log("Formato LC DESIGNS")
                     cveProveedor = 'LCDE';
                     const tbody = document.getElementById('resultadosBody');
@@ -1016,7 +1040,7 @@
                             return Promise.resolve([]); // No se encontraron números de parte
                         }*/
                         mensajeConsultando.style.display = "block";
-                        return fetch(`http://localhost:8081/data`, {
+                        return fetch(`http://192.168.10.69:8081/data`, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -1089,7 +1113,7 @@
                         .catch((error) => {
                             console.error('Error al procesar los resultados:', error);
                         });
-                }else if(proveedor == 'NEXGENPM'){
+                }else if(proveedor == 'NEXGEN PACKAGING MEXICO'){
                     console.log("Formato nexgen")
                     cveProveedor = 'NPM170';
                     const tbody = document.getElementById('resultadosBody');
@@ -1121,7 +1145,7 @@
                             return Promise.resolve([]); // No se encontraron números de parte
                         }*/
                         mensajeConsultando.style.display = "block";
-                        return fetch(`http://localhost:8081/data`, {
+                        return fetch(`http://192.168.10.69:8081/data`, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -1204,14 +1228,38 @@
         document.addEventListener("DOMContentLoaded", function () {
             const fileInput = document.getElementById("fileUp-input");
             const proveedorSelect = document.getElementById("proveedorSelect");
-    
+            const suggestionsBox = document.getElementById("suggestionsBox");
+
             // Deshabilitar el campo de carga de archivos al cargar la página
             fileInput.disabled = true;
     
-            // Habilitar el campo de carga cuando se selecciona un proveedor
-            proveedorSelect.addEventListener("change", function () {
-                fileInput.disabled = !proveedorSelect.value; // Solo habilita si hay un proveedor seleccionado
-            });
+            // Mostrar sugerencias al hacer clic en el input
+    proveedorSelect.addEventListener("focus", () => {
+        suggestionsBox.innerHTML = suggestions
+            .map(
+                (suggestion) =>
+                    `<li class="suggestion-item">${suggestion}</li>`
+            )
+            .join("");
+        suggestionsBox.style.display = "block";
+    });
+
+    // Ocultar sugerencias cuando el input pierde el foco
+    proveedorSelect.addEventListener("blur", () => {
+        setTimeout(() => {
+            suggestionsBox.style.display = "none";
+        }, 200);
+    });
+
+    // Habilitar el input de archivo al seleccionar una sugerencia
+    suggestionsBox.addEventListener("click", (event) => {
+        if (event.target.tagName === "LI") {
+            const selectedSuggestion = event.target.textContent;
+            proveedorSelect.value = selectedSuggestion; // Asigna el valor al input
+            fileInput.disabled = false; // Habilita el campo de carga
+            suggestionsBox.style.display = "none"; // Oculta las sugerencias
+        }
+    });
         });
     
         function subir() {
@@ -1232,7 +1280,7 @@
             const formData = new FormData();
             formData.append('file', file);
     
-            fetch('http://localhost:8081/upload', {
+            fetch('http://192.168.10.69:8081/upload', {
                 method: "POST",
                 body: formData
             })
