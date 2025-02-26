@@ -79,14 +79,15 @@ header{
 .iconosPDFExcel{
   height: 800px;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
   align-items: center;
   color: rgb(206, 206, 206);
-  flex-direction: column;
+
 }
 .enlaceDiv, .enlaceDiv a{
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: flex-end;
   color: #ffffff;
   text-decoration: none;
@@ -332,14 +333,14 @@ header{
   }
 }
 .gif_cargando{
-  height: 50px;
+  height: 80px;
 }
 /* Estilo para la tarjeta del mensaje */
 .mensaje-card {
   width: 300px; /* Ancho de la tarjeta */
   padding: 20px; /* Espaciado interno */
   margin: 20px auto; /* Centrado horizontal */
-  background-color: #ffffff3a; /* Fondo blanco */
+  background-color: #ffffff; /* Fondo blanco */
   backdrop-filter: blur(9px);
   border-radius: 40px; /* Bordes redondeados */
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Sombra sutil */
@@ -355,7 +356,7 @@ header{
   bottom: 20px; /* Espaciado desde el fondo */
   left: 50%; /* Centrado horizontal */
   transform: translateX(-50%); /* Asegura que el centro de la tarjeta esté alineado con el centro de la ventana */
-  
+  z-index: 9999; /* Asegura que esté por encima de todo */
   animation: aparecer 0.5s ease-out;
 }
 
@@ -441,19 +442,28 @@ a{
   
 }
 .nota{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   background-color: #548ca8a1;
   border-radius: 30px;
-  color: rgb(255, 255, 255);
+  color: var(--blanco);
   width: 70%;
 
 
 }
-
-.nota > h1, .nota > p{
+.notas_parrafo{
+  
+}
+p{
+  font-size: larger;
+}
+.nota > h1, .notas_parrafo > p{
   margin-top: 20px;
   margin-left: 20px;
   margin-right: 20px;
   margin-bottom: 20px;
+  font-size: medium;
 }
 
 /* lista de sugerencias*/
@@ -528,3 +538,5 @@ a{
 .container-suggestions li:hover {
   background-color: #414b57;
 }
+
+

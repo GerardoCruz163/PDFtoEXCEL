@@ -4,7 +4,6 @@ let suggestions = [
     'FINOTEX',
     'TRAY',
     'HITACHI Reliable Solutions',
-    'WENZHOU MODERN WESHARE INTERNATIONAL BUSINESS CO., LTD',
     'MANSONS Driving change',
     'LPR',
     'LC DESIGNS TRADING CO., LIMITED',
