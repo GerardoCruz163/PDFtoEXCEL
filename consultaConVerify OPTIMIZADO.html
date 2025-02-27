@@ -97,6 +97,7 @@
                     <th>Marca</th>
                     <th>Submodelo</th>
                     <th>No. Serie</th>
+                    <th></th>
                     <th>VALORACION</th>
                     <th>TIPO DE MERCAN</th>
                     <th>VINCULACION</th>
@@ -146,7 +147,7 @@
                 let numeroFactura = jsonData.invoice_number;
                 invoiceNum = jsonData.invoice_number;
                 numeroFacturaNombre = `Layout_Factura_${numeroFactura}`;
-                let totalMonto = formatPrice(jsonData.total);
+                let totalMonto = formatPrice(jsonData.total).replace(/,/g, '');
                 
                 //let totalMonto= toString(jsonData.total)
                 let moneda = jsonData.currency_code;
@@ -290,6 +291,7 @@
                                 <td>${''}</td>
                                 <td>${''}</td>
                                 <td>${''}</td>
+                                <th>${''}</th>
                                 <td>${row.IMP_EXPO || 'ND'}</td>
                                 <td>${row.EDO_MERC || 'ND'}</td>
                                 <td>${vinc || 'ND'}</td>
@@ -298,7 +300,7 @@
                             
                             const cells = tr.querySelectorAll('td');
                         cells.forEach((cell) => {
-                            if (cell.textContent.trim() === 'No disponible') {
+                            if (cell.textContent.trim() === 'No disponible' || cell.textContent.trim() === 'NaN') {
                                 cell.style.backgroundColor = '#f8d7da'; // Color rojo claro
                                 cell.style.color = '#721c24'; // Texto en rojo oscuro
                             }
@@ -419,10 +421,14 @@
                         cell.font = { name: 'Arial', color: { argb: "000000" } };
                         cell.alignment = { wrapText: true };
         
-                        // Aplica formato de moneda a la columna "MONTO FACTURA"
+                        //aplica formato de moneda a la columna "MONTO FACTURA"
                         if (encabezado === "MONTO FACTURA" && !isNaN(cell.value) && cell.value !== "") {
-                            cell.value = parseFloat(cell.value); // Convertir a número
+                            cell.value = parseFloat(cell.value); // Convertir a nmero
                             cell.numFmt = '"$"#,##0.00'; // Formato moneda
+                        }
+                        if (encabezado === "VINCULACION") {
+                            cell.numFmt = "General"; 
+                            cell.alignment = { horizontal: "left" }; 
                         }
         
                         // Si el valor es solo numérico, convertirlo en texto con apóstrofe
@@ -432,7 +438,7 @@
                             cell.protection = { locked: false, hidden: false };
                         }
         
-                        // Si el valor es "No disponible", cambiar color de celda
+                        //si el valor es "No disponible", cambiar color de celda
                         if (cell.value === "No disponible") {
                             cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: "FFCCCC" } };
                             cell.font = { name: 'Arial', color: { argb: "FF0000" } };
@@ -441,7 +447,7 @@
                 });
             });
         
-            // Ajustar el ancho de las columnas
+            // ajustar el ancho de las columnas
             worksheet.columns = encabezados.map((col, colIndex) => ({
                 width: Math.max(
                     ...filas.map(fila => (fila[colIndex]?.length || 0)) 

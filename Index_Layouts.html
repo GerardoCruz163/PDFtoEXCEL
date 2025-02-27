@@ -126,6 +126,7 @@
                     <th>Marca</th>
                     <th>Submodelo</th>
                     <th>No. Serie</th>
+                    <th></th>
                     <th>VALORACION</th>
                     <th>TIPO DE MERCAN</th>
                     <th>VINCULACION</th>
@@ -182,7 +183,7 @@
                 }else{
                     fechaFactura = jsonData.date.match(regexFecha);
                 }
-                let totalMonto = formatPrice(jsonData.total);
+                let totalMonto = formatPrice(jsonData.total).replace(/,/g, '');
                 let moneda = jsonData.currency_code;
                 let valoresMercancia = [];
                 let cantidadUMC = [];
@@ -194,7 +195,7 @@
                 
                 jsonData.line_items.forEach((item)=>{
                     let cantidad = item.quantity;
-                    let valoresMerc = formatPrice(item.total);
+                    let valoresMerc = formatPrice(item.total).replace(/,/g, '');
                     cantidadUMC.push(cantidad);
                     valoresMercancia.push(valoresMerc);
                 })
@@ -314,6 +315,7 @@
                                 <td>${''}</td>
                                 <td>${''}</td>
                                 <td>${''}</td>
+                                <th>${''}</th>
                                 <td>${row.IMP_EXPO || 'ND'}</td>
                                 <td>${row.EDO_MERC || 'ND'}</td>
                                 <td>${row.CVE_VINC || 'ND'}</td>
@@ -322,7 +324,7 @@
                             
                             const cells = tr.querySelectorAll('td');
                         cells.forEach((cell) => {
-                            if (cell.textContent.trim() === 'No disponible') {
+                            if (cell.textContent.trim() === 'No disponible' || cell.textContent.trim() === 'NaN') {
                                 cell.style.backgroundColor = '#f8d7da'; // Color rojo claro
                                 cell.style.color = '#721c24'; // Texto en rojo oscuro
                             }
@@ -484,7 +486,7 @@
                     filaExcel.eachCell(cell => {
                         cell.font = { name: 'Arial', color: { argb: "000000" } };
                         cell.alignment = { wrapText: true };
-                        if (cell.value === "No disponible") {
+                        if (cell.value === "No disponible" || cell.value === "NaN") {
                             cell.fill = {
                                 type: 'pattern',
                                 pattern: 'solid',
