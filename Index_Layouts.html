@@ -78,11 +78,11 @@
     </header>
     
     <div class="mensaje-card" id="subiendoMsj" style="display: none;">
-        <img class="gif_cargando" src="http://localhost:80/pdfToExcel%20Dic/ResidenciaGera/Imagenes/invoice.gif" alt="">
+        <img class="gif_cargando" src="http://192.168.10.69/pdfToExcel%20Dic/ResidenciaGera/Imagenes/invoice.gif" alt="">
         <p>Extrayendo datos...</p>
     </div>
     <div class="mensaje-card" id="consultandoMsj" style="display: none;">
-        <img class="gif_cargando" src="http://localhost:80/pdfToExcel%20Dic/ResidenciaGera/Imagenes/database.gif" alt="">
+        <img class="gif_cargando" src="http://192.168.10.69/pdfToExcel%20Dic/ResidenciaGera/Imagenes/database.gif" alt="">
         <p>Consultando a la base de datos, ya casi esta listo...</p>
     </div>
 
@@ -268,7 +268,7 @@
                         return Promise.resolve([]); // No se encontraron números de parte
                     }*/
                     mensajeConsultando.style.display = "block";
-                    return fetch(`http://localhost:8081/data`, {
+                    return fetch(`http://192.168.10.69/data`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -406,7 +406,7 @@
             const formData = new FormData();
             formData.append('file', file);
     
-            fetch('http://localhost:8081/upload', {
+            fetch('http://192.168.10.69/upload', {
                 method: "POST",
                 body: formData
             })
