@@ -14,6 +14,7 @@
 </head>
 <body>
 
+    <!--PUERTO 8081 DE MANERA LOCAL-->
     <header id="eBotones" class="divBotones">
         <div class="imagenFondo">
             
@@ -78,11 +79,11 @@
     </header>
     
     <div class="mensaje-card" id="subiendoMsj" style="display: none;">
-        <img class="gif_cargando" src="http://192.168.10.69/pdfToExcel%20Dic/ResidenciaGera/Imagenes/invoice.gif" alt="">
+        <img class="gif_cargando" src="http://localhost:8081/pdfToExcel%20Dic/ResidenciaGera/Imagenes/invoice.gif" alt="">
         <p>Extrayendo datos...</p>
     </div>
     <div class="mensaje-card" id="consultandoMsj" style="display: none;">
-        <img class="gif_cargando" src="http://192.168.10.69/pdfToExcel%20Dic/ResidenciaGera/Imagenes/database.gif" alt="">
+        <img class="gif_cargando" src="http://localhost:8081/pdfToExcel%20Dic/ResidenciaGera/Imagenes/database.gif" alt="">
         <p>Consultando a la base de datos, ya casi esta listo...</p>
     </div>
 
@@ -268,7 +269,7 @@
                         return Promise.resolve([]); // No se encontraron números de parte
                     }*/
                     mensajeConsultando.style.display = "block";
-                    return fetch(`http://192.168.10.69/data`, {
+                    return fetch(`http://localhost:8081/data`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -360,31 +361,31 @@
             fileInput.disabled = true;
     
             // Mostrar sugerencias al hacer clic en el input
-        proveedorSelect.addEventListener("focus", () => {
-            suggestionsBox.innerHTML = suggestions
-            .map(
-                (suggestion) =>
-                    `<li class="suggestion-item">${suggestion}</li>`
-            )
-            .join("");
-            suggestionsBox.style.display = "block";
-        });
+            proveedorSelect.addEventListener("focus", () => {
+                suggestionsBox.innerHTML = suggestions
+                .map(
+                    (suggestion) =>
+                        `<li class="suggestion-item">${suggestion}</li>`
+                )
+                .join("");
+                suggestionsBox.style.display = "block";
+            });
 
-        // Ocultar sugerencias cuando el input pierde el foco
-        proveedorSelect.addEventListener("blur", () => {
-            setTimeout(() => {
-            suggestionsBox.style.display = "none";
-            }, 200);
-        });
+            // Ocultar sugerencias cuando el input pierde el foco
+            proveedorSelect.addEventListener("blur", () => {
+                setTimeout(() => {
+                suggestionsBox.style.display = "none";
+                }, 200);
+            });
 
-        // Habilitar el input de archivo al seleccionar una sugerencia
-        suggestionsBox.addEventListener("click", (event) => {
-            if (event.target.tagName === "LI") {
-                const selectedSuggestion = event.target.textContent;
-                proveedorSelect.value = selectedSuggestion; // Asigna el valor al input
-                fileInput.disabled = false; // Habilita el campo de carga
-                suggestionsBox.style.display = "none"; // Oculta las sugerencias
-            }
+            // Habilitar el input de archivo al seleccionar una sugerencia
+            suggestionsBox.addEventListener("click", (event) => {
+                if (event.target.tagName === "LI") {
+                    const selectedSuggestion = event.target.textContent;
+                    proveedorSelect.value = selectedSuggestion; // Asigna el valor al input
+                    fileInput.disabled = false; // Habilita el campo de carga
+                    suggestionsBox.style.display = "none"; // Oculta las sugerencias
+                }
             });
         });
     
@@ -406,7 +407,7 @@
             const formData = new FormData();
             formData.append('file', file);
     
-            fetch('http://192.168.10.69/upload', {
+            fetch('http://localhost:8081/upload', {
                 method: "POST",
                 body: formData
             })
