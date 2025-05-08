@@ -7,19 +7,19 @@
     <title>TLA: Factura a Layout</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="pestanas.css?v=1.0">
-    <link rel="icon" href="http://localhost:80/pdfToExcel%20Dic/ResidenciaGera/Imagenes/Imagen AATLASA.jpg">
+    <link rel="icon" href="http://192.168.10.69/pdfToExcel%20Dic/ResidenciaGera/Imagenes/Imagen AATLASA.jpg">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/exceljs/dist/exceljs.min.js"></script>
     
 </head>
 <body>
-
+    <!-- cambio de ruta -->
     <!--PUERTO 8081 DE MANERA LOCAL-->
     <header id="eBotones" class="divBotones">
         <div class="imagenFondo">
             
         </div>
-        <img src="http://localhost:80/pdfToExcel%20Dic/ResidenciaGera/Imagenes/AATLA_Logo_FObscuros.png" alt="Logo" class="logo">
+        <img src="http://192.168.10.69/pdfToExcel%20Dic/ResidenciaGera/Imagenes/AATLA_Logo_FObscuros.png" alt="Logo" class="logo">
 
         <!-- LISTA DE PROVEEDORES -->
         <!-- <select name="Selecciona un Proveedor" class="listaProveedores" id="proveedorSelect" > 
@@ -79,11 +79,11 @@
     </header>
     
     <div class="mensaje-card" id="subiendoMsj" style="display: none;">
-        <img class="gif_cargando" src="http://localhost:8081/pdfToExcel%20Dic/ResidenciaGera/Imagenes/invoice.gif" alt="">
+        <img class="gif_cargando" src="http://192.168.10.69/pdfToExcel%20Dic/ResidenciaGera/Imagenes/invoice.gif" alt="">
         <p>Extrayendo datos...</p>
     </div>
     <div class="mensaje-card" id="consultandoMsj" style="display: none;">
-        <img class="gif_cargando" src="http://localhost:8081/pdfToExcel%20Dic/ResidenciaGera/Imagenes/database.gif" alt="">
+        <img class="gif_cargando" src="http://192.168.10.69/pdfToExcel%20Dic/ResidenciaGera/Imagenes/database.gif" alt="">
         <p>Consultando a la base de datos, ya casi esta listo...</p>
     </div>
 
@@ -269,7 +269,7 @@
                         return Promise.resolve([]); // No se encontraron números de parte
                     }*/
                     mensajeConsultando.style.display = "block";
-                    return fetch(`http://localhost:8081/data`, {
+                    return fetch(`http://192.168.10.69/data`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -407,7 +407,7 @@
             const formData = new FormData();
             formData.append('file', file);
     
-            fetch('http://localhost:8081/upload', {
+            fetch('http://192.168.10.69/upload', {
                 method: "POST",
                 body: formData
             })
