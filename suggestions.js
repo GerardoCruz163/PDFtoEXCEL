@@ -8,4 +8,5 @@ let suggestions = [
     'LPR',
     'LC DESIGNS TRADING CO., LIMITED',
     'NEXGEN PACKAGING MEXICO',
+    'IDROMECCANICA BERTOLINI'
 ];

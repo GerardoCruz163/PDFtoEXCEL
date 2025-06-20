@@ -19,7 +19,7 @@
         <div class="imagenFondo">
             
         </div>
-        <img src="http://192.168.10.69/pdfToExcel%20Dic/ResidenciaGera/Imagenes/AATLA_Logo_FObscuros.png" alt="Logo" class="logo">
+        <img src="http://192.168.10.69/pdfToExcel%20Dic/ResidenciaGera/Imagenes/AATLA_Logo_FObscuros.png" alt="Logo" class="logo"><!-- local 'localhost:80' -->
 
         <!-- LISTA DE PROVEEDORES -->
         <!-- <select name="Selecciona un Proveedor" class="listaProveedores" id="proveedorSelect" > 
@@ -262,6 +262,10 @@
                         coincidencias = texto.match(/\b[A-Z]{3}-[A-Z]{2}(?:\/[A-Z0-9]+)*\/\d{5,7}(?:\/[A-Z0-9]+)*\b/g); 
                         numerosParte = coincidencias; //Obtengo el primer numero que enuentre
                         console.log(numerosParte);
+                    }else if(proveedor == "IDROMECCANICA BERTOLINI"){
+                        cveProveedor = 'ALT011';
+                        
+                        numerosParte = item.sku || '';
                     }
                     
                     //console.log('valor mercancia ', valoresMercancia, '\numc ',cantidadUMC);
@@ -348,7 +352,7 @@
             
             })
             .catch(error => {
-                console.error('Error al leer el archivo JSON:', error);
+                console.error('Error al leer el archivo JSON:', error); // aqui lanza el error
             });
         }
 
